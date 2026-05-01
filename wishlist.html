@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wishlist — NOVA Store</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<div id="navbar-container"></div>
+<main>
+<section class="page-header">
+  <div class="container-xxl">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="index.html">Home</a></li><li class="breadcrumb-item active">Wishlist</li></ol></nav>
+    <h1 class="h2 fw-bold mt-3">My Wishlist <span class="text-muted fw-normal fs-5" id="wishCount"></span></h1>
+  </div>
+</section>
+<section class="section-pad">
+  <div class="container-xxl">
+    <div id="emptyWish" class="text-center py-5 d-none">
+      <div style="font-size:5rem">💝</div>
+      <h3 class="fw-bold mt-3 mb-2">Your wishlist is empty</h3>
+      <p class="text-muted mb-4">Save items you love to buy them later.</p>
+      <a href="products.html" class="btn btn-primary btn-lg px-5"><i class="fas fa-heart me-2"></i>Discover Products</a>
+    </div>
+    <div id="wishContent">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div id="wishItemCount" class="text-muted small"></div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-primary btn-sm" onclick="addAllToCart()"><i class="fas fa-cart-plus me-2"></i>Add All to Cart</button>
+          <button class="btn btn-outline-danger btn-sm" onclick="clearWishlistAll()"><i class="fas fa-trash me-2"></i>Clear All</button>
+        </div>
+      </div>
+      <div class="products-grid" id="wishGrid"></div>
+    </div>
+  </div>
+</section>
+</main>
+<div id="footer-container"></div>
+<div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index:9998"></div>
+<button id="backToTop" class="btn btn-primary position-fixed" style="bottom:88px;right:24px;display:none;z-index:9990"><i class="fas fa-arrow-up"></i></button>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/data.js"></script><script src="js/auth.js"></script><script src="js/cart.js"></script><script src="js/app.js"></script>
+<script>
+function renderWishlist() {
+  const list = getWishlist();
+  document.getElementById('wishCount').textContent = list.length ? `(${list.length})` : '';
+  document.getElementById('wishItemCount').textContent = `${list.length} item${list.length!==1?'s':''}`;
+  if (!list.length) {
+    document.getElementById('emptyWish').classList.remove('d-none');
+    document.getElementById('wishContent').style.display = 'none';
+    return;
+  }
+  document.getElementById('emptyWish').classList.add('d-none');
+  document.getElementById('wishContent').style.display = '';
+  document.getElementById('wishGrid').innerHTML = list.map(item => {
+    const discount = item.oldPrice ? Math.round((1-item.price/item.oldPrice)*100) : 0;
+    return `<div class="col" id="witem-${item.id}">
+      <div class="product-card">
+        <div class="product-img-wrap">
+          <img src="${item.image}" alt="${item.name}" loading="lazy" onerror="this.src='https://placehold.co/400x400/1a1a2e/7c3aed?text=NOVA'">
+          ${discount>0?`<span class="product-discount">-${discount}%</span>`:''}
+          <div class="product-overlay">
+            <button class="btn-overlay" title="View Product" onclick="window.location='product.html?id=${item.id}'"><i class="fas fa-eye"></i></button>
+            <button class="btn-overlay" title="Remove from Wishlist" onclick="removeWishItem(${item.id})" style="color:#ef4444"><i class="fas fa-heart-broken"></i></button>
+          </div>
+        </div>
+        <div class="product-body">
+          <div class="product-brand">${item.brand}</div>
+          <h6 class="product-name">${item.name}</h6>
+          <div class="product-stars">${renderStars(item.rating)}</div>
+          <div class="product-price-row">
+            <span class="product-price">${formatPrice(item.price)}</span>
+            ${item.oldPrice?`<span class="product-old-price">${formatPrice(item.oldPrice)}</span>`:''}
+          </div>
+          <div class="d-flex gap-2 mt-2">
+            <button class="btn btn-add-cart flex-fill" onclick="moveWishToCart(${item.id})"><i class="fas fa-cart-plus me-1"></i>Add to Cart</button>
+            <button class="btn btn-icon" style="width:36px;height:36px;flex-shrink:0" onclick="removeWishItem(${item.id})"><i class="fas fa-times" style="color:var(--danger);font-size:0.8rem"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function removeWishItem(id) {
+  const p = getWishlist().find(i=>i.id===id);
+  if (p) { toggleWishlist(p); }
+  renderWishlist();
+  updateWishlistBadge();
+}
+
+function moveWishToCart(id) {
+  const p = getWishlist().find(i=>i.id===id);
+  if (!p) return;
+  const full = PRODUCTS.find(x=>x.id===id) || p;
+  addToCart(full);
+  toggleWishlist(p);
+  renderWishlist();
+  updateWishlistBadge();
+}
+
+function addAllToCart() {
+  const list = getWishlist();
+  list.forEach(p => { const full = PRODUCTS.find(x=>x.id===p.id)||p; addToCart(full); });
+  saveWishlist([]);
+  updateWishlistBadge();
+  renderWishlist();
+  showToast(`Added ${list.length} item${list.length!==1?'s':''} to cart!`, 'success');
+}
+
+function clearWishlistAll() {
+  if (confirm('Clear your entire wishlist?')) { saveWishlist([]); updateWishlistBadge(); renderWishlist(); }
+}
+
+document.addEventListener('DOMContentLoaded', renderWishlist);
+</script>
+</body>
+</html>

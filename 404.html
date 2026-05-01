@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 — Page Not Found — NOVA Store</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+  <style>
+    .glitch { position:relative; }
+    .glitch::before, .glitch::after { content:attr(data-text); position:absolute; top:0; left:0; width:100%; height:100%; background:var(--bg); }
+    .glitch::before { left:3px; text-shadow:-2px 0 #ff006e; animation:glitch1 2s infinite; clip-path:polygon(0 0,100% 0,100% 35%,0 35%); }
+    .glitch::after  { left:-3px; text-shadow:2px 0 #00d4ff; animation:glitch2 2s infinite; clip-path:polygon(0 65%,100% 65%,100% 100%,0 100%); }
+    @keyframes glitch1 { 0%,14%,15%,49%,50%,99%,100%{transform:none} 14.5%,49.5%{transform:translateX(-4px)} }
+    @keyframes glitch2 { 0%,20%,21%,62%,63%,99%,100%{transform:none} 20.5%,62.5%{transform:translateX(4px)} }
+    .floating { animation: float 4s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+<div id="navbar-container"></div>
+<main>
+  <div class="not-found-section">
+    <div class="container text-center" style="max-width:680px">
+      <div class="not-found-num glitch mb-4" data-text="404">404</div>
+      <div class="floating mb-4" style="font-size:5rem">🔍</div>
+      <h2 class="fw-bold mb-3">Oops! Page Not Found</h2>
+      <p class="text-muted mb-5 fs-5">The page you're looking for seems to have vanished into the cosmos. Let's get you back on track.</p>
+      <div class="d-flex gap-3 justify-content-center flex-wrap mb-5">
+        <a href="index.html" class="btn btn-primary btn-lg px-5"><i class="fas fa-home me-2"></i>Go Home</a>
+        <a href="products.html" class="btn btn-outline-primary btn-lg px-5"><i class="fas fa-shopping-bag me-2"></i>Shop Now</a>
+        <button class="btn btn-outline-secondary btn-lg px-4" onclick="history.back()"><i class="fas fa-arrow-left me-2"></i>Go Back</button>
+      </div>
+      <!-- Quick links -->
+      <div class="nova-card p-4">
+        <h6 class="fw-bold mb-3 text-muted">Popular Pages</h6>
+        <div class="row g-2">
+          <div class="col-6 col-md-3"><a href="products.html" class="d-block p-3 rounded-3 text-decoration-none" style="background:var(--card2);color:var(--text2);transition:var(--trans)" onmouseover="this.style.background='rgba(124,58,237,0.15)'" onmouseout="this.style.background='var(--card2)'"><i class="fas fa-box mb-2 d-block" style="color:var(--primary-light)"></i><small>Products</small></a></div>
+          <div class="col-6 col-md-3"><a href="offers.html" class="d-block p-3 rounded-3 text-decoration-none" style="background:var(--card2);color:var(--text2);transition:var(--trans)" onmouseover="this.style.background='rgba(124,58,237,0.15)'" onmouseout="this.style.background='var(--card2)'"><i class="fas fa-tag mb-2 d-block" style="color:var(--danger)"></i><small>Deals</small></a></div>
+          <div class="col-6 col-md-3"><a href="cart.html" class="d-block p-3 rounded-3 text-decoration-none" style="background:var(--card2);color:var(--text2);transition:var(--trans)" onmouseover="this.style.background='rgba(124,58,237,0.15)'" onmouseout="this.style.background='var(--card2)'"><i class="fas fa-shopping-cart mb-2 d-block" style="color:var(--success)"></i><small>Cart</small></a></div>
+          <div class="col-6 col-md-3"><a href="contact.html" class="d-block p-3 rounded-3 text-decoration-none" style="background:var(--card2);color:var(--text2);transition:var(--trans)" onmouseover="this.style.background='rgba(124,58,237,0.15)'" onmouseout="this.style.background='var(--card2)'"><i class="fas fa-headset mb-2 d-block" style="color:var(--accent2)"></i><small>Support</small></a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<div id="footer-container"></div>
+<div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index:9998"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/data.js"></script><script src="js/auth.js"></script><script src="js/cart.js"></script><script src="js/app.js"></script>
+</body>
+</html>

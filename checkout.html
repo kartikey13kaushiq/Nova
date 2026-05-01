@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout — NOVA Store</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<div id="navbar-container"></div>
+<main>
+<section class="page-header">
+  <div class="container-xxl">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="index.html">Home</a></li><li class="breadcrumb-item"><a href="cart.html">Cart</a></li><li class="breadcrumb-item active">Checkout</li></ol></nav>
+    <h1 class="h2 fw-bold mt-3">Checkout</h1>
+  </div>
+</section>
+
+<section class="section-pad">
+  <div class="container-xxl">
+    <!-- Steps -->
+    <div class="checkout-steps mb-5">
+      <div class="step done" id="step1"><div class="step-circle"><i class="fas fa-check"></i></div><div class="step-label">Cart</div></div>
+      <div class="step-line done"></div>
+      <div class="step active" id="step2"><div class="step-circle">2</div><div class="step-label">Details</div></div>
+      <div class="step-line" id="line23"></div>
+      <div class="step" id="step3"><div class="step-circle">3</div><div class="step-label">Payment</div></div>
+      <div class="step-line" id="line34"></div>
+      <div class="step" id="step4"><div class="step-circle">4</div><div class="step-label">Confirm</div></div>
+    </div>
+
+    <!-- Empty guard -->
+    <div id="emptyCartGuard" class="text-center py-5 d-none">
+      <div style="font-size:4rem">🛒</div>
+      <h4 class="mt-3">Your cart is empty</h4>
+      <a href="products.html" class="btn btn-primary mt-3">Shop Now</a>
+    </div>
+
+    <div id="checkoutContent" class="row g-4">
+      <!-- Left: Forms -->
+      <div class="col-lg-7">
+
+        <!-- Step 2: Address -->
+        <div id="formAddress" class="nova-card p-4 mb-4">
+          <h5 class="fw-bold mb-4"><i class="fas fa-map-marker-alt me-2" style="color:var(--primary-light)"></i>Shipping Address</h5>
+          <div class="row g-3">
+            <div class="col-6"><label class="form-label">First Name *</label><input type="text" class="form-control" id="firstName" placeholder="John"></div>
+            <div class="col-6"><label class="form-label">Last Name *</label><input type="text" class="form-control" id="lastName" placeholder="Doe"></div>
+            <div class="col-12"><label class="form-label">Email *</label><input type="email" class="form-control" id="emailField" placeholder="john@example.com"></div>
+            <div class="col-12"><label class="form-label">Phone</label><input type="tel" class="form-control" id="phoneField" placeholder="+1 (555) 000-0000"></div>
+            <div class="col-12"><label class="form-label">Street Address *</label><input type="text" class="form-control" id="streetField" placeholder="123 Main Street, Apt 4B"></div>
+            <div class="col-6"><label class="form-label">City *</label><input type="text" class="form-control" id="cityField" placeholder="New York"></div>
+            <div class="col-3"><label class="form-label">State</label><input type="text" class="form-control" id="stateField" placeholder="NY"></div>
+            <div class="col-3"><label class="form-label">ZIP *</label><input type="text" class="form-control" id="zipField" placeholder="10001"></div>
+          </div>
+          <button class="btn btn-primary mt-4 px-5" onclick="goToPayment()">Continue to Payment <i class="fas fa-arrow-right ms-2"></i></button>
+        </div>
+
+        <!-- Step 3: Payment (hidden initially) -->
+        <div id="formPayment" class="nova-card p-4 mb-4 d-none">
+          <h5 class="fw-bold mb-4"><i class="fas fa-credit-card me-2" style="color:var(--primary-light)"></i>Payment Method</h5>
+          <div class="d-flex flex-column gap-3">
+            <!-- Credit Card -->
+            <div class="payment-option" onclick="selectPayment('card')" id="pay-card" style="border:2px solid var(--primary);border-radius:var(--radius-lg);padding:16px;cursor:pointer;background:rgba(124,58,237,0.05)">
+              <div class="d-flex align-items-center gap-3">
+                <div style="width:44px;height:44px;background:rgba(124,58,237,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center"><i class="fas fa-credit-card" style="color:var(--primary-light)"></i></div>
+                <div class="flex-fill"><div class="fw-semibold">Credit / Debit Card</div><div class="small text-muted">Visa, Mastercard, Amex</div></div>
+                <div class="d-flex gap-2"><i class="fab fa-cc-visa fs-5 text-muted"></i><i class="fab fa-cc-mastercard fs-5 text-muted"></i><i class="fab fa-cc-amex fs-5 text-muted"></i></div>
+              </div>
+              <div id="cardFields" class="mt-3">
+                <div class="row g-3">
+                  <div class="col-12"><input type="text" class="form-control" placeholder="Card Number" maxlength="19" oninput="formatCard(this)"></div>
+                  <div class="col-6"><input type="text" class="form-control" placeholder="MM / YY" maxlength="7"></div>
+                  <div class="col-6"><input type="text" class="form-control" placeholder="CVV" maxlength="4"></div>
+                  <div class="col-12"><input type="text" class="form-control" placeholder="Name on Card"></div>
+                </div>
+              </div>
+            </div>
+            <!-- PayPal -->
+            <div class="payment-option" onclick="selectPayment('paypal')" id="pay-paypal" style="border:2px solid var(--border2);border-radius:var(--radius-lg);padding:16px;cursor:pointer">
+              <div class="d-flex align-items-center gap-3">
+                <div style="width:44px;height:44px;background:rgba(0,112,192,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center"><i class="fab fa-paypal" style="color:#0070c0"></i></div>
+                <div><div class="fw-semibold">PayPal</div><div class="small text-muted">Pay securely via PayPal</div></div>
+              </div>
+            </div>
+            <!-- COD -->
+            <div class="payment-option" onclick="selectPayment('cod')" id="pay-cod" style="border:2px solid var(--border2);border-radius:var(--radius-lg);padding:16px;cursor:pointer">
+              <div class="d-flex align-items-center gap-3">
+                <div style="width:44px;height:44px;background:rgba(34,197,94,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center"><i class="fas fa-money-bill-wave" style="color:var(--success)"></i></div>
+                <div><div class="fw-semibold">Cash on Delivery</div><div class="small text-muted">Pay when you receive</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex gap-3 mt-4">
+            <button class="btn btn-outline-secondary" onclick="goBack()"><i class="fas fa-arrow-left me-2"></i>Back</button>
+            <button class="btn btn-primary flex-fill py-3" onclick="placeOrderNow()"><i class="fas fa-lock me-2"></i>Place Order</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Summary -->
+      <div class="col-lg-5">
+        <div class="order-summary-card">
+          <h5 class="fw-bold mb-4">Order Summary</h5>
+          <div id="checkoutItems" class="mb-4"></div>
+          <div class="cart-total-row"><span>Subtotal</span><span id="coSubtotal"></span></div>
+          <div class="cart-total-row"><span>Shipping</span><span id="coShipping"></span></div>
+          <div class="cart-total-row"><span>Tax (8%)</span><span id="coTax"></span></div>
+          <div class="cart-total-row total"><span>Total</span><span id="coTotal" style="color:var(--primary-light)"></span></div>
+          <div class="mt-4 p-3 rounded-3 d-flex gap-2 align-items-center" style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2)">
+            <i class="fas fa-shield-alt" style="color:var(--success)"></i>
+            <span class="small" style="color:var(--success)">Your payment info is safe & encrypted.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Screen (hidden) -->
+    <div id="orderSuccess" class="text-center py-5 d-none">
+      <div style="font-size:5rem;margin-bottom:20px">🎉</div>
+      <h2 class="fw-bold mb-2 gradient-text">Order Placed Successfully!</h2>
+      <p class="text-muted mb-1">Thank you for your purchase. Your order ID is:</p>
+      <div class="nova-card d-inline-block px-5 py-3 mb-4 mt-2">
+        <span class="fw-bold fs-5" id="orderIdDisplay" style="color:var(--primary-light)"></span>
+      </div>
+      <p class="text-muted mb-4">You'll receive a confirmation shortly. Track your order in <a href="orders.html">My Orders</a>.</p>
+      <div class="d-flex gap-3 justify-content-center flex-wrap">
+        <a href="orders.html" class="btn btn-primary px-5">View Orders</a>
+        <a href="index.html" class="btn btn-outline-primary px-5">Continue Shopping</a>
+        <button class="btn btn-outline-secondary" onclick="printInvoice()"><i class="fas fa-print me-2"></i>Print Invoice</button>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+<div id="footer-container"></div>
+<div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index:9998"></div>
+<button id="backToTop" class="btn btn-primary position-fixed" style="bottom:88px;right:24px;display:none;z-index:9990"><i class="fas fa-arrow-up"></i></button>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/data.js"></script><script src="js/auth.js"></script><script src="js/cart.js"></script><script src="js/app.js"></script>
+<script>
+let selectedPayment = 'card';
+let lastOrder = null;
+
+function renderCheckoutSummary() {
+  const cart = getCart();
+  if (!cart.length) { document.getElementById('emptyCartGuard').classList.remove('d-none'); document.getElementById('checkoutContent').style.display='none'; return; }
+  const sub = getCartSubtotal(), ship = getShipping(sub), tax = getTax(sub), total = sub+ship+tax;
+  document.getElementById('checkoutItems').innerHTML = cart.map(i => `
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <div class="position-relative"><img src="${i.image}" style="width:52px;height:52px;border-radius:var(--radius-sm);object-fit:cover" onerror="this.src='https://placehold.co/52x52/1a1a2e/7c3aed?text=N'">
+      <span class="position-absolute top-0 end-0 badge rounded-pill" style="background:var(--primary);font-size:0.65rem;transform:translate(4px,-4px)">${i.quantity}</span></div>
+      <div class="flex-fill"><div class="small fw-semibold" style="color:var(--text)">${i.name}</div><div class="small text-muted">${formatPrice(i.price)} × ${i.quantity}</div></div>
+      <div class="fw-bold small" style="color:var(--primary-light)">${formatPrice(i.price*i.quantity)}</div>
+    </div>`).join('');
+  document.getElementById('coSubtotal').textContent = formatPrice(sub);
+  document.getElementById('coShipping').innerHTML = ship===0?'<span class="free">FREE</span>':formatPrice(ship);
+  document.getElementById('coTax').textContent = formatPrice(tax);
+  document.getElementById('coTotal').textContent = formatPrice(total);
+  // Pre-fill if logged in
+  const user = getCurrentUser();
+  if (user) {
+    document.getElementById('firstName').value = user.name.split(' ')[0] || '';
+    document.getElementById('lastName').value = user.name.split(' ').slice(1).join(' ') || '';
+    document.getElementById('emailField').value = user.email || '';
+    document.getElementById('phoneField').value = user.phone || '';
+  }
+}
+
+function goToPayment() {
+  const first=document.getElementById('firstName').value.trim();
+  const last=document.getElementById('lastName').value.trim();
+  const email=document.getElementById('emailField').value.trim();
+  const street=document.getElementById('streetField').value.trim();
+  const city=document.getElementById('cityField').value.trim();
+  const zip=document.getElementById('zipField').value.trim();
+  if(!first||!last||!email||!street||!city||!zip){showToast('Please fill in all required fields.','warning');return;}
+  if(!email.includes('@')){showToast('Please enter a valid email.','warning');return;}
+  document.getElementById('formAddress').classList.add('d-none');
+  document.getElementById('formPayment').classList.remove('d-none');
+  document.getElementById('step2').classList.remove('active'); document.getElementById('step2').classList.add('done');
+  document.getElementById('step2').querySelector('.step-circle').innerHTML='<i class="fas fa-check"></i>';
+  document.getElementById('step3').classList.add('active');
+  document.getElementById('line23').classList.add('done');
+  window.scrollTo({top:300,behavior:'smooth'});
+}
+
+function goBack() {
+  document.getElementById('formAddress').classList.remove('d-none');
+  document.getElementById('formPayment').classList.add('d-none');
+  document.getElementById('step3').classList.remove('active');
+  document.getElementById('step2').classList.remove('done'); document.getElementById('step2').classList.add('active');
+  document.getElementById('step2').querySelector('.step-circle').innerHTML='2';
+  document.getElementById('line23').classList.remove('done');
+}
+
+function selectPayment(method) {
+  selectedPayment = method;
+  ['card','paypal','cod'].forEach(m => {
+    const el = document.getElementById('pay-'+m);
+    el.style.border = m===method ? '2px solid var(--primary)' : '2px solid var(--border2)';
+    el.style.background = m===method ? 'rgba(124,58,237,0.05)' : '';
+  });
+  document.getElementById('cardFields').style.display = method==='card' ? 'block' : 'none';
+}
+
+function placeOrderNow() {
+  const addr = {
+    street: document.getElementById('streetField').value,
+    city: document.getElementById('cityField').value,
+    state: document.getElementById('stateField').value,
+    zip: document.getElementById('zipField').value
+  };
+  const btn = document.querySelector('#formPayment .btn-primary');
+  btn.innerHTML = '<span class="spin me-2"><i class="fas fa-circle-notch"></i></span>Processing…';
+  btn.disabled = true;
+  setTimeout(() => {
+    const order = placeOrder(addr, selectedPayment);
+    if (order) {
+      lastOrder = order;
+      document.getElementById('checkoutContent').style.display='none';
+      document.getElementById('orderSuccess').classList.remove('d-none');
+      document.getElementById('orderIdDisplay').textContent = order.id;
+      ['step3','step4'].forEach(s=>{ document.getElementById(s).classList.remove('active'); document.getElementById(s).classList.add('done'); document.getElementById(s).querySelector('.step-circle').innerHTML='<i class="fas fa-check"></i>'; });
+      document.getElementById('line34').classList.add('done');
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+  }, 1800);
+}
+
+function printInvoice() {
+  if (!lastOrder) return;
+  const w = window.open('','_blank');
+  w.document.write(`<html><head><title>Invoice ${lastOrder.id}</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:600px;margin:0 auto}h1{color:#7c3aed}table{width:100%;border-collapse:collapse}td,th{padding:10px;border:1px solid #eee;text-align:left}.total{font-weight:bold;font-size:1.1em}</style></head><body>
+    <h1>⚡ NOVA Store — Invoice</h1>
+    <p><b>Order ID:</b> ${lastOrder.id} &nbsp; <b>Date:</b> ${formatDate(lastOrder.date)}</p>
+    <p><b>Ship to:</b> ${lastOrder.address}</p>
+    <table><thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody>
+    ${lastOrder.items.map(i=>`<tr><td>${i.name}</td><td>${i.qty}</td><td>${formatPrice(i.price)}</td><td>${formatPrice(i.price*i.qty)}</td></tr>`).join('')}
+    </tbody></table>
+    <br><table><tr><td>Subtotal</td><td>${formatPrice(lastOrder.subtotal)}</td></tr><tr><td>Shipping</td><td>${formatPrice(lastOrder.shipping)}</td></tr><tr><td>Tax</td><td>${formatPrice(lastOrder.tax)}</td></tr><tr class="total"><td><b>Total</b></td><td><b>${formatPrice(lastOrder.total)}</b></td></tr></table>
+    <p style="margin-top:40px;color:#888;font-size:0.85em">Thank you for shopping with NOVA Store!</p>
+    </body></html>`);
+  w.document.close(); w.print();
+}
+
+function formatCard(el) {
+  let v = el.value.replace(/\D/g,'').substring(0,16);
+  el.value = v.replace(/(.{4})/g,'$1 ').trim();
+}
+
+document.addEventListener('DOMContentLoaded', renderCheckoutSummary);
+</script>
+</body>
+</html>

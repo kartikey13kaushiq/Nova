@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Management — NOVA Store Admin</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<div id="navbar-container"></div>
+<main style="padding-top:var(--nav-h)">
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <div class="admin-sidebar p-3" id="adminSidebar">
+    <div class="p-2 mb-3">
+      <div class="small text-muted text-uppercase fw-bold mb-2" style="font-size:0.7rem;letter-spacing:1px">Main</div>
+      <a href="admin.html" class="nav-link"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+      <a href="admin-products.html" class="nav-link active"><i class="fas fa-box"></i>Products</a>
+      <a href="admin-orders.html" class="nav-link"><i class="fas fa-shopping-bag"></i>Orders</a>
+      <a href="admin-users.html" class="nav-link"><i class="fas fa-users"></i>Users</a>
+    </div>
+    <div class="p-2">
+      <div class="small text-muted text-uppercase fw-bold mb-2" style="font-size:0.7rem;letter-spacing:1px">Account</div>
+      <a href="profile.html" class="nav-link"><i class="fas fa-user"></i>My Profile</a>
+      <button class="nav-link w-100 text-start" onclick="logout()" style="background:none;border:none;color:var(--danger)"><i class="fas fa-sign-out-alt"></i>Logout</button>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="admin-main">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+      <div>
+        <h4 class="fw-bold mb-0">Product Management</h4>
+        <div class="text-muted small" id="prodCount"></div>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-icon d-lg-none" onclick="document.getElementById('adminSidebar').classList.toggle('show')"><i class="fas fa-bars"></i></button>
+        <button class="btn btn-primary btn-sm" onclick="openProductModal()"><i class="fas fa-plus me-1"></i>Add Product</button>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="nova-card p-3 mb-4">
+      <div class="row g-2 align-items-center">
+        <div class="col-md-4">
+          <div class="search-wrap">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input w-100" id="prodSearch" placeholder="Search products…" oninput="renderProducts()">
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <select class="form-select form-select-sm" id="catFilter" onchange="renderProducts()">
+            <option value="">All Categories</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-3">
+          <select class="form-select form-select-sm" id="sortFilter" onchange="renderProducts()">
+            <option value="default">Sort: Default</option>
+            <option value="price-asc">Price ↑</option>
+            <option value="price-desc">Price ↓</option>
+            <option value="rating">Top Rated</option>
+            <option value="name">Name A-Z</option>
+          </select>
+        </div>
+        <div class="col-md-2 text-end">
+          <span class="small text-muted" id="filteredCount"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="nova-card overflow-hidden">
+      <div class="table-responsive">
+        <table class="admin-table w-100">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Rating</th>
+              <th>Featured</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="productsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</main>
+
+<!-- Add/Edit Product Modal -->
+<div class="modal fade" id="productModal" tabindex="-1" data-bs-backdrop="static">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content nova-modal">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="productModalTitle">Add Product</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="productForm">
+          <input type="hidden" id="editProductId">
+          <div class="row g-3">
+            <div class="col-md-8">
+              <label class="form-label">Product Name *</label>
+              <input type="text" class="form-control" id="pName" required placeholder="e.g. Apple iPhone 15 Pro">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Brand *</label>
+              <input type="text" class="form-control" id="pBrand" required placeholder="Apple">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Category *</label>
+              <select class="form-select" id="pCategory" required></select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Price ($) *</label>
+              <input type="number" class="form-control" id="pPrice" min="0" step="0.01" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Old Price ($)</label>
+              <input type="number" class="form-control" id="pOldPrice" min="0" step="0.01" placeholder="Original price">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Stock *</label>
+              <input type="number" class="form-control" id="pStock" min="0" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Rating</label>
+              <input type="number" class="form-control" id="pRating" min="1" max="5" step="0.1" value="4.5">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Reviews Count</label>
+              <input type="number" class="form-control" id="pReviews" min="0" value="0">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Badge</label>
+              <select class="form-select" id="pBadge">
+                <option value="">None</option>
+                <option>Best Seller</option><option>New</option><option>Hot</option>
+                <option>Sale</option><option>Trending</option><option>Luxury</option><option>Deal</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Image URL</label>
+              <input type="url" class="form-control" id="pImage" placeholder="https://images.unsplash.com/…">
+            </div>
+            <div class="col-12">
+              <label class="form-label">Description *</label>
+              <textarea class="form-control" id="pDesc" rows="3" required placeholder="Product description…"></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Tags (comma-separated)</label>
+              <input type="text" class="form-control" id="pTags" placeholder="laptop, apple, premium">
+            </div>
+            <div class="col-12">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="pFeatured">
+                <label class="form-check-label" for="pFeatured">Featured Product</label>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer border-0">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" onclick="saveProduct()"><i class="fas fa-save me-1"></i>Save Product</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:400px">
+    <div class="modal-content nova-modal text-center p-4">
+      <div style="font-size:3rem;margin-bottom:12px">🗑️</div>
+      <h5 class="fw-bold mb-2">Delete Product?</h5>
+      <p class="text-muted small mb-4" id="deleteProductName"></p>
+      <div class="d-flex gap-3 justify-content-center">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index:9998"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/data.js"></script><script src="js/auth.js"></script><script src="js/cart.js"></script><script src="js/app.js"></script>
+<script>
+requireAdmin();
+
+// Runtime product list — starts from PRODUCTS, persists in session
+let adminProducts = JSON.parse(sessionStorage.getItem('nova_admin_products') || 'null') || [...PRODUCTS];
+function saveAdminProducts() { sessionStorage.setItem('nova_admin_products', JSON.stringify(adminProducts)); }
+
+function initFilters() {
+  const catSel = document.getElementById('catFilter');
+  CATEGORIES.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id; opt.textContent = c.name;
+    catSel.appendChild(opt);
+  });
+  const pCatSel = document.getElementById('pCategory');
+  CATEGORIES.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id; opt.textContent = c.name;
+    pCatSel.appendChild(opt);
+  });
+}
+
+function renderProducts() {
+  let prods = [...adminProducts];
+  const q = document.getElementById('prodSearch').value.toLowerCase();
+  const cat = document.getElementById('catFilter').value;
+  const sort = document.getElementById('sortFilter').value;
+  if (q) prods = prods.filter(p => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q));
+  if (cat) prods = prods.filter(p => p.category === cat);
+  if (sort === 'price-asc') prods.sort((a,b) => a.price-b.price);
+  else if (sort === 'price-desc') prods.sort((a,b) => b.price-a.price);
+  else if (sort === 'rating') prods.sort((a,b) => b.rating-a.rating);
+  else if (sort === 'name') prods.sort((a,b) => a.name.localeCompare(b.name));
+
+  document.getElementById('prodCount').textContent = `${adminProducts.length} total products`;
+  document.getElementById('filteredCount').textContent = `${prods.length} shown`;
+
+  document.getElementById('productsTableBody').innerHTML = prods.map(p => {
+    const cat = CATEGORIES.find(c=>c.id===p.category);
+    const discount = p.oldPrice ? Math.round((1-p.price/p.oldPrice)*100) : 0;
+    return `
+    <tr>
+      <td>
+        <div class="d-flex align-items-center gap-2">
+          <img src="${p.image}" class="admin-table .product-thumb" style="width:42px;height:42px;border-radius:8px;object-fit:cover" onerror="this.src='https://placehold.co/42x42/1a1a2e/7c3aed?text=N'">
+          <div>
+            <div class="fw-semibold" style="font-size:0.85rem;color:var(--text)">${p.name}</div>
+            <div class="text-muted" style="font-size:0.75rem">${p.brand}</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        ${cat ? `<span class="badge" style="background:${cat.bg};color:${cat.color}">${cat.name}</span>` : p.category}
+      </td>
+      <td>
+        <div class="fw-semibold" style="color:var(--primary-light)">${formatPrice(p.price)}</div>
+        ${discount>0 ? `<div class="small text-muted text-decoration-line-through">${formatPrice(p.oldPrice)}</div>` : ''}
+      </td>
+      <td>
+        <span class="badge ${p.stock>10?'bg-success':p.stock>0?'bg-warning text-dark':'bg-danger'}">${p.stock}</span>
+      </td>
+      <td>
+        <div style="font-size:0.78rem">${renderStars(p.rating)}</div>
+        <div class="text-muted" style="font-size:0.72rem">${p.rating}</div>
+      </td>
+      <td>
+        ${p.featured ? '<i class="fas fa-star text-warning"></i>' : '<i class="far fa-star text-muted"></i>'}
+      </td>
+      <td>
+        <div class="d-flex gap-1">
+          <a href="product.html?id=${p.id}" target="_blank" class="btn btn-icon" style="width:30px;height:30px" title="View"><i class="fas fa-eye" style="font-size:0.75rem"></i></a>
+          <button class="btn btn-icon" style="width:30px;height:30px;background:rgba(124,58,237,0.1)" title="Edit" onclick="openProductModal(${p.id})"><i class="fas fa-pen" style="font-size:0.75rem;color:var(--primary-light)"></i></button>
+          <button class="btn btn-icon" style="width:30px;height:30px;background:rgba(239,68,68,0.1)" title="Delete" onclick="confirmDelete(${p.id})"><i class="fas fa-trash" style="font-size:0.75rem;color:var(--danger)"></i></button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openProductModal(id = null) {
+  document.getElementById('productModalTitle').textContent = id ? 'Edit Product' : 'Add Product';
+  document.getElementById('productForm').reset();
+  document.getElementById('editProductId').value = '';
+  if (id) {
+    const p = adminProducts.find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('editProductId').value = p.id;
+    document.getElementById('pName').value = p.name;
+    document.getElementById('pBrand').value = p.brand;
+    document.getElementById('pCategory').value = p.category;
+    document.getElementById('pPrice').value = p.price;
+    document.getElementById('pOldPrice').value = p.oldPrice || '';
+    document.getElementById('pStock').value = p.stock;
+    document.getElementById('pRating').value = p.rating;
+    document.getElementById('pReviews').value = p.reviews;
+    document.getElementById('pBadge').value = p.badge || '';
+    document.getElementById('pImage').value = p.image || '';
+    document.getElementById('pDesc').value = p.description;
+    document.getElementById('pTags').value = (p.tags || []).join(', ');
+    document.getElementById('pFeatured').checked = !!p.featured;
+  }
+  new bootstrap.Modal(document.getElementById('productModal')).show();
+}
+
+function saveProduct() {
+  const form = document.getElementById('productForm');
+  if (!form.checkValidity()) { form.reportValidity(); return; }
+  const id = document.getElementById('editProductId').value;
+  const data = {
+    name: document.getElementById('pName').value.trim(),
+    brand: document.getElementById('pBrand').value.trim(),
+    category: document.getElementById('pCategory').value,
+    price: parseFloat(document.getElementById('pPrice').value),
+    oldPrice: parseFloat(document.getElementById('pOldPrice').value) || null,
+    stock: parseInt(document.getElementById('pStock').value),
+    rating: parseFloat(document.getElementById('pRating').value),
+    reviews: parseInt(document.getElementById('pReviews').value),
+    badge: document.getElementById('pBadge').value || null,
+    image: document.getElementById('pImage').value || 'https://placehold.co/400x400/1a1a2e/7c3aed?text=NOVA',
+    description: document.getElementById('pDesc').value.trim(),
+    tags: document.getElementById('pTags').value.split(',').map(t=>t.trim()).filter(Boolean),
+    featured: document.getElementById('pFeatured').checked,
+  };
+  if (id) {
+    const idx = adminProducts.findIndex(p => p.id === parseInt(id));
+    if (idx > -1) { adminProducts[idx] = { ...adminProducts[idx], ...data }; showToast('Product updated! ✅', 'success'); }
+  } else {
+    data.id = Date.now();
+    data.images = [data.image];
+    adminProducts.unshift(data);
+    showToast('Product added! 🎉', 'success');
+  }
+  saveAdminProducts();
+  bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
+  renderProducts();
+}
+
+let deleteTargetId = null;
+function confirmDelete(id) {
+  const p = adminProducts.find(x=>x.id===id);
+  if (!p) return;
+  deleteTargetId = id;
+  document.getElementById('deleteProductName').textContent = `"${p.name}" will be permanently removed.`;
+  document.getElementById('confirmDeleteBtn').onclick = () => {
+    adminProducts = adminProducts.filter(x=>x.id!==id);
+    saveAdminProducts();
+    bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+    showToast('Product deleted.', 'info');
+    renderProducts();
+  };
+  new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+
+document.addEventListener('DOMContentLoaded', () => { initFilters(); renderProducts(); });
+</script>
+</body>
+</html>

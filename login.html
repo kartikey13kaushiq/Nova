@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — NOVA Store</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<div id="navbar-container"></div>
+
+<div class="auth-page">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-5">
+        <div class="auth-card scale-in">
+          <div class="text-center mb-4">
+            <div class="brand-icon mx-auto mb-3" style="width:52px;height:52px;font-size:1.3rem"><i class="fas fa-bolt"></i></div>
+            <h2 class="auth-title">Welcome back</h2>
+            <p class="text-muted small">Sign in to your NOVA Store account</p>
+          </div>
+
+          <!-- Demo credentials hint -->
+          <div class="p-3 mb-4 rounded-3" style="background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.25)">
+            <div class="small fw-semibold mb-1" style="color:var(--primary-light)"><i class="fas fa-info-circle me-1"></i>Demo Credentials</div>
+            <div class="small text-muted">
+              <b>Admin:</b> admin@test.com / admin123<br>
+              <b>User:</b> user1@test.com / user123
+            </div>
+            <div class="d-flex gap-2 mt-2">
+              <button class="btn btn-sm" style="font-size:0.72rem;background:var(--card2);border:1px solid var(--border2);color:var(--text3);border-radius:var(--radius-pill);padding:3px 10px" onclick="fillDemo('admin@test.com','admin123')">Admin</button>
+              <button class="btn btn-sm" style="font-size:0.72rem;background:var(--card2);border:1px solid var(--border2);color:var(--text3);border-radius:var(--radius-pill);padding:3px 10px" onclick="fillDemo('user1@test.com','user123')">User 1</button>
+              <button class="btn btn-sm" style="font-size:0.72rem;background:var(--card2);border:1px solid var(--border2);color:var(--text3);border-radius:var(--radius-pill);padding:3px 10px" onclick="fillDemo('user2@test.com','user123')">User 2</button>
+            </div>
+          </div>
+
+          <div id="loginError" class="alert d-none" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;border-radius:var(--radius-md)"></div>
+
+          <form onsubmit="doLogin(event)">
+            <div class="mb-3">
+              <label class="form-label">Email Address</label>
+              <div class="position-relative">
+                <i class="fas fa-envelope position-absolute" style="left:14px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:0.85rem"></i>
+                <input type="email" class="form-control" id="loginEmail" style="padding-left:38px" placeholder="you@example.com" required>
+              </div>
+            </div>
+            <div class="mb-4">
+              <div class="d-flex justify-content-between mb-1">
+                <label class="form-label mb-0">Password</label>
+                <a href="#" class="small" style="color:var(--primary-light)" onclick="showToast('Password reset email sent! (Demo)','success');return false">Forgot?</a>
+              </div>
+              <div class="position-relative">
+                <i class="fas fa-lock position-absolute" style="left:14px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:0.85rem"></i>
+                <input type="password" class="form-control" id="loginPassword" style="padding-left:38px;padding-right:44px" placeholder="••••••••" required>
+                <button type="button" class="position-absolute btn p-0" style="right:12px;top:50%;transform:translateY(-50%);color:var(--text3);background:none;border:none" onclick="togglePwd('loginPassword',this)">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            <div class="form-check mb-4">
+              <input class="form-check-input" type="checkbox" id="rememberMe">
+              <label class="form-check-label small" for="rememberMe">Remember me</label>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 py-3" id="loginBtn">
+              <i class="fas fa-sign-in-alt me-2"></i>Sign In
+            </button>
+          </form>
+
+          <div class="divider">or continue with</div>
+          <div class="d-flex gap-3 mb-4">
+            <button class="social-login-btn flex-fill" onclick="showToast('Google login coming soon!','info')"><i class="fab fa-google me-2" style="color:#ea4335"></i>Google</button>
+            <button class="social-login-btn flex-fill" onclick="showToast('Apple login coming soon!','info')"><i class="fab fa-apple me-2"></i>Apple</button>
+          </div>
+
+          <p class="text-center text-muted small mb-0">Don't have an account? <a href="register.html" style="color:var(--primary-light);font-weight:600">Create one</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-container"></div>
+<div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index:9998"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/data.js"></script><script src="js/auth.js"></script><script src="js/cart.js"></script><script src="js/app.js"></script>
+<script>
+// Redirect if already logged in
+if (isLoggedIn()) { window.location.href = getCurrentUser().role==='admin' ? 'admin.html' : 'profile.html'; }
+
+function doLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPassword').value;
+  const btn   = document.getElementById('loginBtn');
+  const err   = document.getElementById('loginError');
+  btn.innerHTML = '<span class="spin me-2"><i class="fas fa-circle-notch"></i></span>Signing in…';
+  btn.disabled = true;
+  err.classList.add('d-none');
+  setTimeout(() => {
+    const result = login(email, pass);
+    if (result.success) {
+      showToast(`Welcome back, ${result.user.name}! 👋`, 'success');
+      setTimeout(() => {
+        const redirect = getParam('redirect') || (result.user.role==='admin' ? 'admin.html' : 'profile.html');
+        window.location.href = redirect;
+      }, 800);
+    } else {
+      err.textContent = result.message;
+      err.classList.remove('d-none');
+      btn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Sign In';
+      btn.disabled = false;
+    }
+  }, 900);
+}
+
+function fillDemo(email, pass) {
+  document.getElementById('loginEmail').value = email;
+  document.getElementById('loginPassword').value = pass;
+}
+
+function togglePwd(id, btn) {
+  const inp = document.getElementById(id);
+  const isText = inp.type === 'text';
+  inp.type = isText ? 'password' : 'text';
+  btn.innerHTML = `<i class="fas fa-eye${isText ? '' : '-slash'}"></i>`;
+}
+</script>
+</body>
+</html>

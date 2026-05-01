@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — NOVA Store</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<div id="navbar-container"></div>
+<main style="padding-top:var(--nav-h)">
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <div class="admin-sidebar p-3" id="adminSidebar">
+    <div class="p-2 mb-3">
+      <div class="small text-muted text-uppercase fw-bold mb-2" style="font-size:0.7rem;letter-spacing:1px">Main</div>
+      <a href="admin.html" class="nav-link active"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+      <a href="admin-products.html" class="nav-link"><i class="fas fa-box"></i>Products</a>
+      <a href="admin-orders.html" class="nav-link"><i class="fas fa-shopping-bag"></i>Orders</a>
+      <a href="admin-users.html" class="nav-link"><i class="fas fa-users"></i>Users</a>
+    </div>
+    <div class="p-2 mb-3">
+      <div class="small text-muted text-uppercase fw-bold mb-2" style="font-size:0.7rem;letter-spacing:1px">Store</div>
+      <a href="products.html" class="nav-link" target="_blank"><i class="fas fa-store"></i>View Store</a>
+      <a href="offers.html" class="nav-link" target="_blank"><i class="fas fa-tag"></i>Offers</a>
+    </div>
+    <div class="p-2">
+      <div class="small text-muted text-uppercase fw-bold mb-2" style="font-size:0.7rem;letter-spacing:1px">Account</div>
+      <a href="profile.html" class="nav-link"><i class="fas fa-user"></i>My Profile</a>
+      <button class="nav-link w-100 text-start" onclick="logout()" style="background:none;border:none;color:var(--danger)"><i class="fas fa-sign-out-alt"></i>Logout</button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="admin-main">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+      <div>
+        <h4 class="fw-bold mb-0">Dashboard Overview</h4>
+        <div class="text-muted small" id="dashDate"></div>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-icon d-lg-none" onclick="document.getElementById('adminSidebar').classList.toggle('show')"><i class="fas fa-bars"></i></button>
+        <a href="admin-products.html" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i>Add Product</a>
+      </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3">
+        <div class="stat-card">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div><div class="text-muted small mb-1">Total Revenue</div><div class="stat-num gradient-text" id="statRevenue">—</div></div>
+            <div class="stat-icon" style="background:rgba(124,58,237,0.15);color:var(--primary-light)"><i class="fas fa-dollar-sign"></i></div>
+          </div>
+          <div class="small text-success"><i class="fas fa-arrow-up me-1"></i>12.5% vs last month</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div><div class="text-muted small mb-1">Total Orders</div><div class="stat-num" style="color:var(--accent2)" id="statOrders">—</div></div>
+            <div class="stat-icon" style="background:rgba(6,182,212,0.15);color:var(--accent2)"><i class="fas fa-shopping-bag"></i></div>
+          </div>
+          <div class="small text-success"><i class="fas fa-arrow-up me-1"></i>8.3% vs last month</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div><div class="text-muted small mb-1">Total Users</div><div class="stat-num" style="color:var(--success)" id="statUsers">—</div></div>
+            <div class="stat-icon" style="background:rgba(34,197,94,0.15);color:var(--success)"><i class="fas fa-users"></i></div>
+          </div>
+          <div class="small text-success"><i class="fas fa-arrow-up me-1"></i>3.2% vs last month</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div><div class="text-muted small mb-1">Products</div><div class="stat-num" style="color:var(--accent)" id="statProducts">—</div></div>
+            <div class="stat-icon" style="background:rgba(245,158,11,0.15);color:var(--accent)"><i class="fas fa-box"></i></div>
+          </div>
+          <div class="small text-muted"><i class="fas fa-minus me-1"></i>No change</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+      <div class="col-lg-8">
+        <div class="nova-card p-4 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h6 class="fw-bold mb-0">Revenue Overview</h6>
+            <select class="sort-select" style="font-size:0.78rem;padding:4px 12px;width:auto">
+              <option>Last 7 days</option><option>Last 30 days</option><option>Last 3 months</option>
+            </select>
+          </div>
+          <canvas id="revenueChart" height="100"></canvas>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="nova-card p-4 h-100">
+          <h6 class="fw-bold mb-4">Sales by Category</h6>
+          <canvas id="catChart"></canvas>
+          <div id="catLegend" class="mt-3 d-flex flex-column gap-2"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Orders + Top Products -->
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="nova-card p-4">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h6 class="fw-bold mb-0">Recent Orders</h6>
+            <a href="admin-orders.html" class="btn btn-sm btn-outline-primary">View All</a>
+          </div>
+          <div class="table-responsive">
+            <table class="admin-table w-100">
+              <thead><tr><th>Order ID</th><th>Date</th><th>Status</th><th>Total</th></tr></thead>
+              <tbody id="recentOrdersTbl"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="nova-card p-4">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h6 class="fw-bold mb-0">Top Products</h6>
+            <a href="admin-products.html" class="btn btn-sm btn-outline-primary">Manage</a>
+          </div>
+          <div id="topProductsList" class="d-flex flex-column gap-3"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row g-3 mt-2">
+      <div class="col-12"><h6 class="fw-bold text-muted">Quick Actions</h6></div>
+      <div class="col-6 col-md-3"><a href="admin-products.html" class="nova-card p-3 d-flex align-items-center gap-2 text-decoration-none"><div style="width:36px;height:36px;background:rgba(124,58,237,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="fas fa-plus" style="color:var(--primary-light);font-size:0.85rem"></i></div><span class="small fw-semibold">Add Product</span></a></div>
+      <div class="col-6 col-md-3"><a href="admin-orders.html" class="nova-card p-3 d-flex align-items-center gap-2 text-decoration-none"><div style="width:36px;height:36px;background:rgba(6,182,212,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="fas fa-clipboard-list" style="color:var(--accent2);font-size:0.85rem"></i></div><span class="small fw-semibold">View Orders</span></a></div>
+      <div class="col-6 col-md-3"><a href="admin-users.html" class="nova-card p-3 d-flex align-items-center gap-2 text-decoration-none"><div style="width:36px;height:36px;background:rgba(34,197,94,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="fas fa-user-plus" style="color:var(--success);font-size:0.85rem"></i></div><span class="small fw-semibold">Manage Users</span></a></div>
+      <div class="col-6 col-md-3"><a href="offers.html" target="_blank" class="nova-card p-3 d-flex align-items-center gap-2 text-decoration-none"><div style="width:36px;height:36px;background:rgba(245,158,11,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="fas fa-tag" style="color:var(--accent);font-size:0.85rem"></i></div><span class="small fw-semibold">View Offers</span></a></div>
+    </div>
+  </div>
+</div>
+</main>
+<div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index:9998"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="js/data.js"></script><script src="js/auth.js"></script><script src="js/cart.js"></script><script src="js/app.js"></script>
+<script>
+requireAdmin();
+
+function loadDashboard() {
+  document.getElementById('dashDate').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const orders = getOrders();
+  const users = getAllUsers();
+  const revenue = orders.reduce((s,o) => s + o.total, 0);
+  document.getElementById('statRevenue').textContent = formatPrice(revenue);
+  document.getElementById('statOrders').textContent = orders.length;
+  document.getElementById('statUsers').textContent = users.length;
+  document.getElementById('statProducts').textContent = PRODUCTS.length;
+
+  // Recent orders table
+  document.getElementById('recentOrdersTbl').innerHTML = orders.slice(0,6).map(o => `
+    <tr>
+      <td><a href="admin-orders.html" style="color:var(--primary-light);font-size:0.82rem">${o.id}</a></td>
+      <td style="font-size:0.82rem">${formatDate(o.date)}</td>
+      <td>${statusBadge(o.status)}</td>
+      <td class="fw-semibold" style="color:var(--text);font-size:0.85rem">${formatPrice(o.total)}</td>
+    </tr>`).join('');
+
+  // Top products
+  const topProds = [...PRODUCTS].sort((a,b)=>b.reviews-a.reviews).slice(0,5);
+  document.getElementById('topProductsList').innerHTML = topProds.map(p => `
+    <div class="d-flex align-items-center gap-3">
+      <img src="${p.image}" style="width:42px;height:42px;border-radius:8px;object-fit:cover" onerror="this.src='https://placehold.co/42x42/1a1a2e/7c3aed?text=N'">
+      <div class="flex-fill">
+        <div class="small fw-semibold" style="color:var(--text)">${p.name}</div>
+        <div class="small text-muted">${p.reviews.toLocaleString()} reviews</div>
+      </div>
+      <div class="text-end">
+        <div class="small fw-bold" style="color:var(--primary-light)">${formatPrice(p.price)}</div>
+        <div class="small">${renderStars(p.rating)}</div>
+      </div>
+    </div>`).join('');
+
+  buildCharts();
+}
+
+function buildCharts() {
+  const isDark = getTheme() === 'dark';
+  const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  const textColor = isDark ? '#94a3b8' : '#475569';
+  Chart.defaults.color = textColor;
+
+  // Revenue chart
+  const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const data = [1240, 1890, 1450, 2300, 1780, 2890, 3100];
+  new Chart(document.getElementById('revenueChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Revenue ($)',
+        data,
+        borderColor: '#7c3aed',
+        backgroundColor: 'rgba(124,58,237,0.1)',
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#7c3aed',
+        pointRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: gridColor } },
+        y: { grid: { color: gridColor }, ticks: { callback: v => '$'+v.toLocaleString() } }
+      }
+    }
+  });
+
+  // Category doughnut
+  const catData = CATEGORIES.map(c => getProductsByCategory(c.id).length);
+  const catColors = ['#7c3aed','#2563eb','#db2777','#d97706','#059669','#e11d48','#0891b2'];
+  new Chart(document.getElementById('catChart'), {
+    type: 'doughnut',
+    data: {
+      labels: CATEGORIES.map(c=>c.name),
+      datasets: [{ data: catData, backgroundColor: catColors, borderWidth: 0, hoverOffset: 6 }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      cutout: '70%',
+    }
+  });
+
+  document.getElementById('catLegend').innerHTML = CATEGORIES.map((c,i) => `
+    <div class="d-flex align-items-center gap-2">
+      <div style="width:10px;height:10px;border-radius:50%;background:${catColors[i]};flex-shrink:0"></div>
+      <span class="small text-muted flex-fill">${c.name}</span>
+      <span class="small fw-semibold">${catData[i]}</span>
+    </div>`).join('');
+}
+
+document.addEventListener('DOMContentLoaded', loadDashboard);
+</script>
+</body>
+</html>

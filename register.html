@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — NOVA Store</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<div id="navbar-container"></div>
+<div class="auth-page">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-5">
+        <div class="auth-card scale-in">
+          <div class="text-center mb-4">
+            <div class="brand-icon mx-auto mb-3" style="width:52px;height:52px;font-size:1.3rem"><i class="fas fa-bolt"></i></div>
+            <h2 class="auth-title">Create Account</h2>
+            <p class="text-muted small">Join NOVA Store & get 15% off your first order</p>
+          </div>
+          <div class="p-3 mb-4 rounded-3" style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25)">
+            <div class="small" style="color:var(--success)"><i class="fas fa-gift me-1"></i>New member offer: Use code <b>WELCOME</b> for 15% off!</div>
+          </div>
+          <div id="regError" class="alert d-none" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;border-radius:var(--radius-md)"></div>
+          <form onsubmit="doRegister(event)">
+            <div class="mb-3">
+              <label class="form-label">Full Name</label>
+              <div class="position-relative">
+                <i class="fas fa-user position-absolute" style="left:14px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:0.85rem"></i>
+                <input type="text" class="form-control" id="regName" style="padding-left:38px" placeholder="John Doe" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email Address</label>
+              <div class="position-relative">
+                <i class="fas fa-envelope position-absolute" style="left:14px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:0.85rem"></i>
+                <input type="email" class="form-control" id="regEmail" style="padding-left:38px" placeholder="you@example.com" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Phone (optional)</label>
+              <div class="position-relative">
+                <i class="fas fa-phone position-absolute" style="left:14px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:0.85rem"></i>
+                <input type="tel" class="form-control" id="regPhone" style="padding-left:38px" placeholder="+1 (555) 000-0000">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Password</label>
+              <div class="position-relative">
+                <i class="fas fa-lock position-absolute" style="left:14px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:0.85rem"></i>
+                <input type="password" class="form-control" id="regPassword" style="padding-left:38px;padding-right:44px" placeholder="Min. 6 characters" required minlength="6" oninput="checkStrength(this.value)">
+                <button type="button" class="position-absolute btn p-0" style="right:12px;top:50%;transform:translateY(-50%);color:var(--text3);background:none;border:none" onclick="togglePwd('regPassword',this)"><i class="fas fa-eye"></i></button>
+              </div>
+              <!-- Password strength -->
+              <div class="mt-2" id="strengthWrap" style="display:none">
+                <div class="progress mb-1"><div class="progress-bar" id="strengthBar" style="width:0%"></div></div>
+                <div class="small" id="strengthLabel" style="color:var(--text3)"></div>
+              </div>
+            </div>
+            <div class="mb-4">
+              <label class="form-label">Confirm Password</label>
+              <div class="position-relative">
+                <i class="fas fa-lock position-absolute" style="left:14px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:0.85rem"></i>
+                <input type="password" class="form-control" id="regConfirm" style="padding-left:38px" placeholder="Re-enter password" required>
+              </div>
+            </div>
+            <div class="form-check mb-4">
+              <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+              <label class="form-check-label small" for="agreeTerms">I agree to the <a href="#" style="color:var(--primary-light)">Terms of Service</a> and <a href="#" style="color:var(--primary-light)">Privacy Policy</a></label>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 py-3" id="regBtn">
+              <i class="fas fa-user-plus me-2"></i>Create Account
+            </button>
+          </form>
+          <div class="divider">or</div>
+          <div class="d-flex gap-3 mb-4">
+            <button class="social-login-btn flex-fill" onclick="showToast('Google signup coming soon!','info')"><i class="fab fa-google me-2" style="color:#ea4335"></i>Google</button>
+            <button class="social-login-btn flex-fill" onclick="showToast('Apple signup coming soon!','info')"><i class="fab fa-apple me-2"></i>Apple</button>
+          </div>
+          <p class="text-center text-muted small mb-0">Already have an account? <a href="login.html" style="color:var(--primary-light);font-weight:600">Sign in</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="footer-container"></div>
+<div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index:9998"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/data.js"></script><script src="js/auth.js"></script><script src="js/cart.js"></script><script src="js/app.js"></script>
+<script>
+if (isLoggedIn()) window.location.href = 'profile.html';
+
+function doRegister(e) {
+  e.preventDefault();
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const phone = document.getElementById('regPhone').value.trim();
+  const pass = document.getElementById('regPassword').value;
+  const confirm = document.getElementById('regConfirm').value;
+  const err = document.getElementById('regError');
+  err.classList.add('d-none');
+  if (pass !== confirm) { err.textContent = 'Passwords do not match.'; err.classList.remove('d-none'); return; }
+  if (pass.length < 6) { err.textContent = 'Password must be at least 6 characters.'; err.classList.remove('d-none'); return; }
+  const btn = document.getElementById('regBtn');
+  btn.innerHTML = '<span class="spin me-2"><i class="fas fa-circle-notch"></i></span>Creating account…';
+  btn.disabled = true;
+  setTimeout(() => {
+    const result = register(name, email, pass, phone);
+    if (result.success) {
+      showToast(`Welcome to NOVA Store, ${name}! 🎉`, 'success');
+      setTimeout(() => window.location.href = 'profile.html', 900);
+    } else {
+      err.textContent = result.message;
+      err.classList.remove('d-none');
+      btn.innerHTML = '<i class="fas fa-user-plus me-2"></i>Create Account';
+      btn.disabled = false;
+    }
+  }, 900);
+}
+
+function checkStrength(val) {
+  const wrap = document.getElementById('strengthWrap');
+  const bar = document.getElementById('strengthBar');
+  const label = document.getElementById('strengthLabel');
+  if (!val) { wrap.style.display='none'; return; }
+  wrap.style.display = 'block';
+  let score = 0;
+  if (val.length >= 6) score++;
+  if (val.length >= 10) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+  const levels = [{w:'20%',c:'#ef4444',t:'Weak'},{w:'40%',c:'#f97316',t:'Fair'},{w:'60%',c:'#eab308',t:'Good'},{w:'80%',c:'#22c55e',t:'Strong'},{w:'100%',c:'#06b6d4',t:'Very Strong'}];
+  const l = levels[Math.min(score-1, 4)] || levels[0];
+  bar.style.width = l.w; bar.style.background = l.c; label.textContent = l.t; label.style.color = l.c;
+}
+
+function togglePwd(id, btn) {
+  const inp = document.getElementById(id);
+  const isText = inp.type === 'text';
+  inp.type = isText ? 'password' : 'text';
+  btn.innerHTML = `<i class="fas fa-eye${isText ? '' : '-slash'}"></i>`;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Management — NOVA Store Admin</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<div id="navbar-container"></div>
+<main style="padding-top:var(--nav-h)">
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <div class="admin-sidebar p-3" id="adminSidebar">
+    <div class="p-2 mb-3">
+      <div class="small text-muted text-uppercase fw-bold mb-2" style="font-size:0.7rem;letter-spacing:1px">Main</div>
+      <a href="admin.html" class="nav-link"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+      <a href="admin-products.html" class="nav-link"><i class="fas fa-box"></i>Products</a>
+      <a href="admin-orders.html" class="nav-link"><i class="fas fa-shopping-bag"></i>Orders</a>
+      <a href="admin-users.html" class="nav-link active"><i class="fas fa-users"></i>Users</a>
+    </div>
+    <div class="p-2">
+      <div class="small text-muted text-uppercase fw-bold mb-2" style="font-size:0.7rem;letter-spacing:1px">Account</div>
+      <a href="profile.html" class="nav-link"><i class="fas fa-user"></i>My Profile</a>
+      <button class="nav-link w-100 text-start" onclick="logout()" style="background:none;border:none;color:var(--danger)"><i class="fas fa-sign-out-alt"></i>Logout</button>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="admin-main">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+      <div>
+        <h4 class="fw-bold mb-0">User Management</h4>
+        <div class="text-muted small" id="userCountLabel"></div>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-icon d-lg-none" onclick="document.getElementById('adminSidebar').classList.toggle('show')"><i class="fas fa-bars"></i></button>
+        <button class="btn btn-primary btn-sm" onclick="openUserModal()"><i class="fas fa-user-plus me-1"></i>Add User</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="stat-card text-center">
+          <div class="stat-num gradient-text" id="statTotal">—</div>
+          <div class="text-muted small">Total Users</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card text-center">
+          <div class="stat-num" style="color:var(--danger)" id="statAdmins">—</div>
+          <div class="text-muted small">Admins</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card text-center">
+          <div class="stat-num" style="color:var(--success)" id="statMembers">—</div>
+          <div class="text-muted small">Members</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card text-center">
+          <div class="stat-num" style="color:var(--accent2)" id="statNewThisMonth">—</div>
+          <div class="text-muted small">New This Month</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="nova-card p-3 mb-4">
+      <div class="row g-2 align-items-center">
+        <div class="col-md-5">
+          <div class="search-wrap">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input w-100" id="userSearch" placeholder="Search by name or email…" oninput="renderUsers()">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select form-select-sm" id="roleFilter" onchange="renderUsers()">
+            <option value="">All Roles</option>
+            <option value="admin">Admin</option>
+            <option value="user">Member</option>
+          </select>
+        </div>
+        <div class="col-md-4 text-end">
+          <span class="small text-muted" id="userShownCount"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="nova-card overflow-hidden">
+      <div class="table-responsive">
+        <table class="admin-table w-100">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Phone</th>
+              <th>Joined</th>
+              <th>Orders</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</main>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="userModal" tabindex="-1" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:480px">
+    <div class="modal-content nova-modal">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="userModalTitle">Add User</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="userForm">
+          <div class="mb-3">
+            <label class="form-label">Full Name *</label>
+            <input type="text" class="form-control" id="uName" required placeholder="John Doe">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email *</label>
+            <input type="email" class="form-control" id="uEmail" required placeholder="john@example.com">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Password *</label>
+            <input type="text" class="form-control" id="uPassword" required placeholder="Set a password" value="user123">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Phone</label>
+            <input type="tel" class="form-control" id="uPhone" placeholder="+1 (555) 000-0000">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Role</label>
+            <select class="form-select" id="uRole">
+              <option value="user">Member</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer border-0">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" onclick="saveUser()"><i class="fas fa-save me-1"></i>Save User</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- User Detail Modal -->
+<div class="modal fade" id="userDetailModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:480px">
+    <div class="modal-content nova-modal">
+      <div class="modal-header border-0">
+        <h5 class="modal-title">User Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="userDetailBody"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index:9998"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/data.js"></script><script src="js/auth.js"></script><script src="js/cart.js"></script><script src="js/app.js"></script>
+<script>
+requireAdmin();
+const currentAdmin = getCurrentUser();
+
+function loadStats() {
+  const users = getAllUsers();
+  const admins = users.filter(u=>u.role==='admin').length;
+  const thisMonth = new Date().toISOString().slice(0,7);
+  const newThisMonth = users.filter(u=>u.joined&&u.joined.startsWith(thisMonth)).length;
+  document.getElementById('statTotal').textContent = users.length;
+  document.getElementById('statAdmins').textContent = admins;
+  document.getElementById('statMembers').textContent = users.length - admins;
+  document.getElementById('statNewThisMonth').textContent = newThisMonth;
+  document.getElementById('userCountLabel').textContent = `${users.length} registered users`;
+}
+
+function renderUsers() {
+  const q = document.getElementById('userSearch').value.toLowerCase();
+  const role = document.getElementById('roleFilter').value;
+  let users = getAllUsers();
+  if (q) users = users.filter(u => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q));
+  if (role) users = users.filter(u => u.role === role);
+  document.getElementById('userShownCount').textContent = `${users.length} shown`;
+  const orders = getOrders();
+
+  document.getElementById('usersTableBody').innerHTML = users.map(u => {
+    const userOrders = orders.filter(o=>o.userId===u.id).length;
+    const isSelf = u.id === currentAdmin?.id;
+    return `
+    <tr>
+      <td>
+        <div class="d-flex align-items-center gap-2">
+          <img src="${u.avatar||`https://api.dicebear.com/7.x/avataaars/svg?seed=${u.id}`}" class="rounded-circle" width="36" height="36" style="object-fit:cover;border:2px solid var(--border2)">
+          <div>
+            <div class="fw-semibold" style="font-size:0.85rem;color:var(--text)">${u.name} ${isSelf?'<span class="badge" style="background:rgba(124,58,237,0.2);color:var(--primary-light);font-size:0.65rem">You</span>':''}</div>
+          </div>
+        </div>
+      </td>
+      <td style="font-size:0.82rem">${u.email}</td>
+      <td>
+        <span class="badge ${u.role==='admin'?'':'bg-success'}" style="${u.role==='admin'?'background:rgba(239,68,68,0.15);color:#fca5a5':''}">${u.role==='admin'?'👑 Admin':'🛍️ Member'}</span>
+      </td>
+      <td style="font-size:0.82rem">${u.phone||'—'}</td>
+      <td style="font-size:0.82rem">${u.joined?formatDate(u.joined):'—'}</td>
+      <td><span class="badge bg-secondary">${userOrders}</span></td>
+      <td>
+        <div class="d-flex gap-1">
+          <button class="btn btn-icon" style="width:30px;height:30px" title="View" onclick="viewUser('${u.id}')"><i class="fas fa-eye" style="font-size:0.75rem"></i></button>
+          ${!isSelf ? `<button class="btn btn-icon" style="width:30px;height:30px;background:rgba(239,68,68,0.1)" title="Delete" onclick="deleteUserById('${u.id}','${u.name}')"><i class="fas fa-trash" style="font-size:0.75rem;color:var(--danger)"></i></button>` : ''}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function viewUser(id) {
+  const u = getAllUsers().find(x=>x.id===id);
+  if (!u) return;
+  const orders = getOrders().filter(o=>o.userId===u.id);
+  const spent = orders.reduce((s,o)=>s+o.total,0);
+  document.getElementById('userDetailBody').innerHTML = `
+    <div class="text-center mb-4">
+      <img src="${u.avatar||`https://api.dicebear.com/7.x/avataaars/svg?seed=${u.id}`}" class="rounded-circle mb-3" width="80" height="80" style="border:3px solid var(--primary)">
+      <h5 class="fw-bold mb-0">${u.name}</h5>
+      <div class="text-muted small">${u.email}</div>
+      <span class="badge mt-2 ${u.role==='admin'?'bg-danger':'bg-success'}">${u.role}</span>
+    </div>
+    <div class="row g-3 mb-3">
+      <div class="col-4 text-center nova-card p-3"><div class="fw-bold gradient-text">${orders.length}</div><div class="small text-muted">Orders</div></div>
+      <div class="col-4 text-center nova-card p-3"><div class="fw-bold gradient-text">${formatPrice(spent)}</div><div class="small text-muted">Spent</div></div>
+      <div class="col-4 text-center nova-card p-3"><div class="fw-bold gradient-text">${u.joined||'—'}</div><div class="small text-muted">Joined</div></div>
+    </div>
+    <table class="table" style="font-size:0.82rem">
+      <tr><td class="text-muted">Phone</td><td>${u.phone||'—'}</td></tr>
+      <tr><td class="text-muted">Address</td><td>${u.address||'—'}</td></tr>
+    </table>`;
+  new bootstrap.Modal(document.getElementById('userDetailModal')).show();
+}
+
+function openUserModal() {
+  document.getElementById('userForm').reset();
+  document.getElementById('uPassword').value = 'user123';
+  new bootstrap.Modal(document.getElementById('userModal')).show();
+}
+
+function saveUser() {
+  const name = document.getElementById('uName').value.trim();
+  const email = document.getElementById('uEmail').value.trim();
+  const password = document.getElementById('uPassword').value.trim();
+  const phone = document.getElementById('uPhone').value.trim();
+  const role = document.getElementById('uRole').value;
+  if (!name || !email || !password) { showToast('Please fill required fields.','warning'); return; }
+  const users = getAllUsers();
+  if (users.find(u=>u.email===email)) { showToast('Email already exists.','danger'); return; }
+  addUser({ name, email, password, phone, role });
+  bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
+  showToast(`User ${name} added! ✅`, 'success');
+  loadStats(); renderUsers();
+}
+
+function deleteUserById(id, name) {
+  if (!confirm(`Delete user "${name}"? This cannot be undone.`)) return;
+  deleteUser(id);
+  showToast(`User ${name} deleted.`, 'info');
+  loadStats(); renderUsers();
+}
+
+document.addEventListener('DOMContentLoaded', () => { loadStats(); renderUsers(); });
+</script>
+</body>
+</html>

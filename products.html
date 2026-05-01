@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products — NOVA Store</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+  <style>
+    .view-toggle .btn { padding: 6px 12px; }
+    .view-toggle .btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    #productList .product-card { flex-direction: row; }
+    #productList .product-img-wrap { width: 180px; flex-shrink: 0; }
+    #productList .product-img-wrap img { height: 180px; width: 180px; }
+    #productList .products-grid { grid-template-columns: 1fr; }
+    .sort-select { background: var(--card2); border: 1.5px solid var(--border2); color: var(--text); border-radius: var(--radius-pill); padding: 6px 14px; font-size: 0.85rem; outline: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+<div id="navbar-container"></div>
+
+<main>
+<!-- Page Header -->
+<section class="page-header">
+  <div class="container-xxl">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="index.html">Home</a></li><li class="breadcrumb-item active" id="breadcrumbCat">Products</li></ol></nav>
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mt-3">
+      <div>
+        <h1 class="h2 fw-bold mb-1" id="pageTitle">All Products</h1>
+        <p class="text-muted mb-0" id="resultCount">Loading...</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-pad">
+  <div class="container-xxl">
+    <div class="row g-4">
+
+      <!-- Sidebar Filters -->
+      <div class="col-lg-3 d-none d-lg-block">
+        <div class="filter-card">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h6 class="fw-bold mb-0">Filters</h6>
+            <button class="btn btn-sm btn-outline-danger" onclick="clearFilters()">Clear All</button>
+          </div>
+
+          <!-- Category -->
+          <div class="mb-4">
+            <div class="filter-title">Category</div>
+            <div id="catFilters"></div>
+          </div>
+
+          <!-- Price Range -->
+          <div class="mb-4">
+            <div class="filter-title">Price Range</div>
+            <input type="range" id="priceRange" class="range-slider w-100" min="0" max="10000" value="10000" step="50" oninput="updatePriceFilter(this.value)">
+            <div class="d-flex justify-content-between mt-1">
+              <span class="small text-muted">$0</span>
+              <span class="small fw-bold" id="priceVal" style="color:var(--primary-light)">$10,000</span>
+            </div>
+          </div>
+
+          <!-- Rating Filter -->
+          <div class="mb-4">
+            <div class="filter-title">Min Rating</div>
+            <div id="ratingFilters">
+              <div class="form-check mb-1"><input class="form-check-input" type="radio" name="rating" id="r-all" value="0" checked onchange="applyFilters()"><label class="form-check-label" for="r-all">All Ratings</label></div>
+              <div class="form-check mb-1"><input class="form-check-input" type="radio" name="rating" id="r-4" value="4" onchange="applyFilters()"><label class="form-check-label" for="r-4">⭐ 4+ Stars</label></div>
+              <div class="form-check mb-1"><input class="form-check-input" type="radio" name="rating" id="r-45" value="4.5" onchange="applyFilters()"><label class="form-check-label" for="r-45">⭐ 4.5+ Stars</label></div>
+            </div>
+          </div>
+
+          <!-- Brand Filter -->
+          <div class="mb-4">
+            <div class="filter-title">Brand</div>
+            <div id="brandFilters"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="col-lg-9">
+        <!-- Toolbar -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+          <div class="d-flex gap-2 flex-wrap">
+            <!-- Mobile filter toggle -->
+            <button class="btn btn-outline-primary btn-sm d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas"><i class="fas fa-sliders me-1"></i>Filters</button>
+            <!-- Active filters display -->
+            <div id="activeFilters" class="d-flex gap-2 flex-wrap"></div>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+              <option value="default">Sort: Default</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="rating">Highest Rated</option>
+              <option value="name-asc">Name: A-Z</option>
+              <option value="name-desc">Name: Z-A</option>
+              <option value="reviews">Most Reviewed</option>
+            </select>
+            <div class="view-toggle btn-group">
+              <button class="btn btn-sm btn-outline-secondary active" id="gridViewBtn" onclick="setView('grid')"><i class="fas fa-th"></i></button>
+              <button class="btn btn-sm btn-outline-secondary" id="listViewBtn" onclick="setView('list')"><i class="fas fa-list"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Skeletons -->
+        <div id="skeletonGrid" class="products-grid">
+          ${Array(8).fill('<div class="col"><div class="product-card"><div class="skeleton skeleton-img"></div><div class="p-3"><div class="skeleton skeleton-text w-40"></div><div class="skeleton skeleton-text w-80"></div><div class="skeleton skeleton-text w-60"></div></div></div></div>').join('')}
+        </div>
+
+        <!-- Products -->
+        <div id="productList" style="display:none">
+          <div class="products-grid" id="productsGrid"></div>
+        </div>
+
+        <!-- No results -->
+        <div id="noResults" class="text-center py-5 d-none">
+          <div style="font-size:4rem">🔍</div>
+          <h4 class="mt-3">No products found</h4>
+          <p class="text-muted">Try adjusting your filters</p>
+          <button class="btn btn-primary" onclick="clearFilters()">Clear Filters</button>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-center mt-5" id="paginationWrap"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Mobile Filter Offcanvas -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="filterOffcanvas" style="background:var(--card);color:var(--text);width:280px">
+  <div class="offcanvas-header border-bottom" style="border-color:var(--border)!important">
+    <h5 class="offcanvas-title">Filters</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" style="filter:invert(1)"></button>
+  </div>
+  <div class="offcanvas-body" id="mobileFilterBody"></div>
+</div>
+
+</main>
+
+<div id="footer-container"></div>
+<div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index:9998"></div>
+<button id="backToTop" class="btn btn-primary position-fixed" style="bottom:88px;right:24px;display:none;z-index:9990"><i class="fas fa-arrow-up"></i></button>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/app.js"></script>
+<script>
+let currentPage = 1;
+const PER_PAGE = 12;
+let currentView = 'grid';
+let activeCategory = getParam('category') || '';
+let activeBrands = new Set();
+let activeMaxPrice = 10000;
+let activeMinRating = 0;
+let activeSearch = getParam('search') || '';
+
+function buildCatFilters() {
+  document.getElementById('catFilters').innerHTML = `
+    <div class="form-check mb-1">
+      <input class="form-check-input" type="checkbox" id="cat-all" ${!activeCategory?'checked':''} onchange="catAll(this)">
+      <label class="form-check-label" for="cat-all">All Categories</label>
+    </div>` +
+    CATEGORIES.map(c => `
+    <div class="form-check mb-1">
+      <input class="form-check-input" type="checkbox" id="cat-${c.id}" value="${c.id}" ${activeCategory===c.id?'checked':''} onchange="catToggle(this)">
+      <label class="form-check-label" for="cat-${c.id}">${c.name}</label>
+    </div>`).join('');
+  document.getElementById('mobileFilterBody').innerHTML = document.getElementById('catFilters').parentElement.parentElement.innerHTML;
+}
+
+function buildBrandFilters() {
+  const brands = [...new Set(PRODUCTS.map(p => p.brand))].sort();
+  document.getElementById('brandFilters').innerHTML = brands.map(b => `
+    <div class="form-check mb-1">
+      <input class="form-check-input" type="checkbox" id="brand-${b}" value="${b}" onchange="brandToggle(this)">
+      <label class="form-check-label" for="brand-${b}" style="font-size:0.82rem">${b}</label>
+    </div>`).join('');
+}
+
+function catAll(el) {
+  if (el.checked) { activeCategory = ''; document.querySelectorAll('[id^="cat-"]:not(#cat-all)').forEach(e => e.checked = false); applyFilters(); }
+}
+function catToggle(el) {
+  document.getElementById('cat-all').checked = false;
+  activeCategory = el.checked ? el.value : '';
+  document.querySelectorAll('[id^="cat-"]:not(#cat-all)').forEach(e => { if (e !== el) e.checked = false; });
+  currentPage = 1;
+  applyFilters();
+}
+function brandToggle(el) {
+  if (el.checked) activeBrands.add(el.value); else activeBrands.delete(el.value);
+  currentPage = 1; applyFilters();
+}
+function updatePriceFilter(val) {
+  activeMaxPrice = parseInt(val);
+  document.getElementById('priceVal').textContent = '$' + parseInt(val).toLocaleString();
+  applyFilters();
+}
+
+function getFilteredProducts() {
+  let prods = [...PRODUCTS];
+  if (activeSearch) {
+    const q = activeSearch.toLowerCase();
+    prods = prods.filter(p => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q) || p.tags.some(t => t.includes(q)));
+  }
+  if (activeCategory) prods = prods.filter(p => p.category === activeCategory);
+  if (activeBrands.size > 0) prods = prods.filter(p => activeBrands.has(p.brand));
+  prods = prods.filter(p => p.price <= activeMaxPrice);
+  activeMinRating = parseFloat(document.querySelector('input[name="rating"]:checked')?.value || 0);
+  if (activeMinRating > 0) prods = prods.filter(p => p.rating >= activeMinRating);
+  const sort = document.getElementById('sortSelect')?.value || 'default';
+  if (sort === 'price-asc') prods.sort((a,b) => a.price - b.price);
+  else if (sort === 'price-desc') prods.sort((a,b) => b.price - a.price);
+  else if (sort === 'rating') prods.sort((a,b) => b.rating - a.rating);
+  else if (sort === 'name-asc') prods.sort((a,b) => a.name.localeCompare(b.name));
+  else if (sort === 'name-desc') prods.sort((a,b) => b.name.localeCompare(a.name));
+  else if (sort === 'reviews') prods.sort((a,b) => b.reviews - a.reviews);
+  return prods;
+}
+
+function applyFilters() {
+  const prods = getFilteredProducts();
+  const total = prods.length;
+  const pages = Math.ceil(total / PER_PAGE);
+  const slice = prods.slice((currentPage-1)*PER_PAGE, currentPage*PER_PAGE);
+
+  document.getElementById('skeletonGrid').style.display = 'none';
+  document.getElementById('productList').style.display = 'block';
+
+  if (slice.length === 0) {
+    document.getElementById('productList').style.display = 'none';
+    document.getElementById('noResults').classList.remove('d-none');
+    document.getElementById('paginationWrap').innerHTML = '';
+    document.getElementById('resultCount').textContent = 'No products found';
+    return;
+  }
+  document.getElementById('noResults').classList.add('d-none');
+
+  const catName = activeCategory ? CATEGORIES.find(c=>c.id===activeCategory)?.name : '';
+  document.getElementById('pageTitle').textContent = activeSearch ? `Search: "${activeSearch}"` : (catName || 'All Products');
+  document.getElementById('resultCount').textContent = `Showing ${(currentPage-1)*PER_PAGE+1}–${Math.min(currentPage*PER_PAGE,total)} of ${total} products`;
+  if (activeCategory) { document.getElementById('breadcrumbCat').textContent = catName; }
+
+  if (currentView === 'list') {
+    document.getElementById('productsGrid').className = 'd-flex flex-column gap-3';
+  } else {
+    document.getElementById('productsGrid').className = 'products-grid';
+  }
+  document.getElementById('productsGrid').innerHTML = slice.map(p => renderProductCard(p)).join('');
+
+  // Pagination
+  if (pages > 1) {
+    let html = '<ul class="pagination">';
+    html += `<li class="page-item ${currentPage===1?'disabled':''}"><button class="page-link" onclick="goPage(${currentPage-1})"><i class="fas fa-chevron-left"></i></button></li>`;
+    for (let i = 1; i <= pages; i++) {
+      if (i===1||i===pages||Math.abs(i-currentPage)<=1) {
+        html += `<li class="page-item ${i===currentPage?'active':''}"><button class="page-link" onclick="goPage(${i})">${i}</button></li>`;
+      } else if (Math.abs(i-currentPage)===2) {
+        html += '<li class="page-item disabled"><span class="page-link">…</span></li>';
+      }
+    }
+    html += `<li class="page-item ${currentPage===pages?'disabled':''}"><button class="page-link" onclick="goPage(${currentPage+1})"><i class="fas fa-chevron-right"></i></button></li></ul>`;
+    document.getElementById('paginationWrap').innerHTML = html;
+  } else {
+    document.getElementById('paginationWrap').innerHTML = '';
+  }
+  setTimeout(initScrollReveal, 50);
+}
+
+function goPage(p) {
+  currentPage = p;
+  applyFilters();
+  window.scrollTo({ top: 300, behavior: 'smooth' });
+}
+function setView(v) {
+  currentView = v;
+  document.getElementById('gridViewBtn').classList.toggle('active', v==='grid');
+  document.getElementById('listViewBtn').classList.toggle('active', v==='list');
+  applyFilters();
+}
+function clearFilters() {
+  activeCategory = ''; activeBrands.clear(); activeMaxPrice = 10000; activeSearch = ''; activeMinRating = 0;
+  currentPage = 1;
+  document.getElementById('priceRange').value = 10000;
+  document.getElementById('priceVal').textContent = '$10,000';
+  document.querySelector('input[name="rating"][value="0"]').checked = true;
+  buildCatFilters();
+  buildBrandFilters();
+  applyFilters();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  buildCatFilters();
+  buildBrandFilters();
+  if (activeSearch) document.getElementById('pageTitle').textContent = `Search: "${activeSearch}"`;
+  setTimeout(applyFilters, 400); // simulate loading
+});
+</script>
+</body>
+</html>

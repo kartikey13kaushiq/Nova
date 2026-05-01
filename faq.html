@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ — NOVA Store</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<div id="navbar-container"></div>
+<main>
+<section class="page-header">
+  <div class="container-xxl">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="index.html">Home</a></li><li class="breadcrumb-item active">FAQ</li></ol></nav>
+    <h1 class="h2 fw-bold mt-3">Frequently Asked Questions</h1>
+    <p class="text-muted">Find quick answers to common questions about NOVA Store.</p>
+  </div>
+</section>
+
+<section class="section-pad">
+  <div class="container-xxl" style="max-width:860px">
+    <!-- Search FAQ -->
+    <div class="search-wrap mb-5">
+      <i class="fas fa-search search-icon"></i>
+      <input type="text" class="search-input w-100" id="faqSearch" placeholder="Search questions…" oninput="filterFAQ(this.value)">
+    </div>
+
+    <!-- Category tabs -->
+    <div class="d-flex gap-2 flex-wrap mb-4" id="faqTabs"></div>
+
+    <!-- FAQ List -->
+    <div id="faqList"></div>
+
+    <!-- Still need help -->
+    <div class="text-center mt-5 p-5 nova-card">
+      <div style="font-size:3rem;margin-bottom:16px">🤔</div>
+      <h4 class="fw-bold mb-2">Still have questions?</h4>
+      <p class="text-muted mb-4">Our support team is available 24/7 and typically responds within 2 hours.</p>
+      <div class="d-flex gap-3 justify-content-center flex-wrap">
+        <a href="contact.html" class="btn btn-primary px-4"><i class="fas fa-envelope me-2"></i>Contact Support</a>
+        <button class="btn btn-outline-primary px-4" onclick="toggleChat()"><i class="fas fa-comments me-2"></i>Live Chat</button>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+<div id="footer-container"></div>
+<div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index:9998"></div>
+<button id="backToTop" class="btn btn-primary position-fixed" style="bottom:88px;right:24px;display:none;z-index:9990"><i class="fas fa-arrow-up"></i></button>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/data.js"></script><script src="js/auth.js"></script><script src="js/cart.js"></script><script src="js/app.js"></script>
+<script>
+const FAQS = [
+  { cat: 'Orders', q: 'How do I track my order?', a: 'Log in to your account and visit "My Orders." Each order shows a real-time status: Processing → Shipped → Delivered. You will also receive an email confirmation with tracking info.' },
+  { cat: 'Orders', q: 'Can I cancel or modify my order?', a: 'Orders can be cancelled before they are shipped. Go to My Orders, find the order, and click "Cancel Order." Once shipped, cancellation is not possible — you may initiate a return instead.' },
+  { cat: 'Orders', q: 'How long does delivery take?', a: 'Standard delivery takes 3–5 business days. Express delivery (1–2 days) is available at checkout for an additional fee. Free standard shipping on all orders over $100.' },
+  { cat: 'Orders', q: 'Do you ship internationally?', a: 'Currently we ship within the United States. International shipping is coming soon! Sign up for our newsletter to be the first to know.' },
+  { cat: 'Returns', q: 'What is your return policy?', a: 'We offer a 30-day hassle-free return policy. Items must be unused, in original packaging, with all tags attached. Contact support@novastore.com or visit our Contact page to start a return.' },
+  { cat: 'Returns', q: 'How long do refunds take?', a: 'Refunds are processed within 2–3 business days after we receive your return. Depending on your bank, it may take an additional 3–5 business days to appear in your account.' },
+  { cat: 'Returns', q: 'Can I exchange an item for a different size or color?', a: 'Yes! Contact our support team within 30 days of delivery. We will arrange a free exchange for the same item in a different variant, subject to availability.' },
+  { cat: 'Payment', q: 'What payment methods do you accept?', a: 'We accept Visa, Mastercard, American Express, PayPal, and Cash on Delivery. All online payments are secured with 256-bit SSL encryption.' },
+  { cat: 'Payment', q: 'Is it safe to use my credit card on NOVA Store?', a: 'Absolutely. Our site uses industry-standard 256-bit SSL encryption. We never store your full card details — all transactions are processed through PCI-DSS compliant payment gateways.' },
+  { cat: 'Payment', q: 'How do coupon codes work?', a: 'Enter your coupon code in the cart page before checkout. The discount is applied automatically. Codes are case-insensitive and each code can only be used once per order. Try NOVA10 for 10% off!' },
+  { cat: 'Products', q: 'Are all products on NOVA Store genuine?', a: 'Yes, 100%. Every product is sourced directly from authorized distributors or brand partners. We never sell counterfeit or grey-market goods. Your purchase is backed by our Authenticity Guarantee.' },
+  { cat: 'Products', q: 'Do products come with a warranty?', a: 'All electronics come with the manufacturer\'s warranty. Fashion and accessories have a 6-month NOVA Store quality guarantee. See individual product pages for specific warranty details.' },
+  { cat: 'Products', q: 'How do I know if a product is in stock?', a: 'Stock status is shown on every product page. "In Stock" (green) means we have it ready to ship. "Low Stock" (yellow) means fewer than 5 units remain. Out-of-stock items show a restock notification sign-up.' },
+  { cat: 'Account', q: 'How do I create an account?', a: 'Click "Login" in the top navigation, then "Create Account." Fill in your name, email, and password. You\'ll receive a 15% welcome discount (code: WELCOME) immediately after registering!' },
+  { cat: 'Account', q: 'I forgot my password. How do I reset it?', a: 'Click "Forgot?" on the login page, enter your email, and we\'ll send a reset link instantly. The link expires in 1 hour. If you don\'t see the email, check your spam folder.' },
+  { cat: 'Account', q: 'Can I use NOVA Store without creating an account?', a: 'You can browse and add items to your cart as a guest. However, you\'ll need an account to place an order and access order history, wishlist, and personalized recommendations.' },
+];
+
+let activeCategory = 'All';
+
+function buildTabs() {
+  const cats = ['All', ...new Set(FAQS.map(f=>f.cat))];
+  document.getElementById('faqTabs').innerHTML = cats.map(c => `
+    <button class="btn btn-sm ${c===activeCategory?'btn-primary':'btn-outline-secondary'}" onclick="setFaqCat('${c}')">${c}</button>
+  `).join('');
+}
+
+function setFaqCat(cat) {
+  activeCategory = cat;
+  buildTabs();
+  renderFAQ(document.getElementById('faqSearch').value);
+}
+
+function renderFAQ(query = '') {
+  const q = query.toLowerCase();
+  const filtered = FAQS.filter(f => {
+    const matchCat = activeCategory === 'All' || f.cat === activeCategory;
+    const matchQ = !q || f.q.toLowerCase().includes(q) || f.a.toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+
+  if (!filtered.length) {
+    document.getElementById('faqList').innerHTML = '<div class="text-center py-4 text-muted">No results found. Try a different search term.</div>';
+    return;
+  }
+
+  // Group by category
+  const groups = {};
+  filtered.forEach(f => { if (!groups[f.cat]) groups[f.cat] = []; groups[f.cat].push(f); });
+
+  document.getElementById('faqList').innerHTML = Object.entries(groups).map(([cat, items]) => `
+    <div class="mb-4">
+      <h6 class="fw-bold mb-3 text-muted text-uppercase small" style="letter-spacing:1px">${cat}</h6>
+      <div class="accordion" id="acc-${cat.replace(/\s/g,'')}">
+        ${items.map((f, i) => {
+          const id = `faq-${cat.replace(/\s/g,'')}-${i}`;
+          return `
+          <div class="accordion-item mb-2">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#${id}">
+                ${f.q}
+              </button>
+            </h2>
+            <div id="${id}" class="accordion-collapse collapse">
+              <div class="accordion-body">${f.a}</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function filterFAQ(val) { renderFAQ(val); }
+
+document.addEventListener('DOMContentLoaded', () => { buildTabs(); renderFAQ(); });
+</script>
+</body>
+</html>

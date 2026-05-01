@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orders Management — NOVA Store Admin</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<div id="navbar-container"></div>
+<main style="padding-top:var(--nav-h)">
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <div class="admin-sidebar p-3" id="adminSidebar">
+    <div class="p-2 mb-3">
+      <div class="small text-muted text-uppercase fw-bold mb-2" style="font-size:0.7rem;letter-spacing:1px">Main</div>
+      <a href="admin.html" class="nav-link"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+      <a href="admin-products.html" class="nav-link"><i class="fas fa-box"></i>Products</a>
+      <a href="admin-orders.html" class="nav-link active"><i class="fas fa-shopping-bag"></i>Orders</a>
+      <a href="admin-users.html" class="nav-link"><i class="fas fa-users"></i>Users</a>
+    </div>
+    <div class="p-2">
+      <div class="small text-muted text-uppercase fw-bold mb-2" style="font-size:0.7rem;letter-spacing:1px">Account</div>
+      <a href="profile.html" class="nav-link"><i class="fas fa-user"></i>My Profile</a>
+      <button class="nav-link w-100 text-start" onclick="logout()" style="background:none;border:none;color:var(--danger)"><i class="fas fa-sign-out-alt"></i>Logout</button>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="admin-main">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+      <div>
+        <h4 class="fw-bold mb-0">Orders Management</h4>
+        <div class="text-muted small" id="ordersCountLabel"></div>
+      </div>
+      <button class="btn btn-icon d-lg-none" onclick="document.getElementById('adminSidebar').classList.toggle('show')"><i class="fas fa-bars"></i></button>
+    </div>
+
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="stat-card text-center">
+          <div class="stat-num gradient-text" id="oStatTotal">—</div>
+          <div class="text-muted small">Total Orders</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card text-center">
+          <div class="stat-num" style="color:var(--warning)" id="oStatProcessing">—</div>
+          <div class="text-muted small">Processing</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card text-center">
+          <div class="stat-num" style="color:var(--accent2)" id="oStatShipped">—</div>
+          <div class="text-muted small">Shipped</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card text-center">
+          <div class="stat-num" style="color:var(--success)" id="oStatDelivered">—</div>
+          <div class="text-muted small">Delivered</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="nova-card p-3 mb-4">
+      <div class="row g-2 align-items-center">
+        <div class="col-md-4">
+          <div class="search-wrap">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input w-100" id="orderSearch" placeholder="Search by Order ID or address…" oninput="renderOrders()">
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <select class="form-select form-select-sm" id="statusFilter" onchange="renderOrders()">
+            <option value="">All Statuses</option>
+            <option value="processing">Processing</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-3">
+          <select class="form-select form-select-sm" id="payFilter" onchange="renderOrders()">
+            <option value="">All Payments</option>
+            <option value="card">Card</option>
+            <option value="paypal">PayPal</option>
+            <option value="cod">COD</option>
+          </select>
+        </div>
+        <div class="col-md-2 text-end">
+          <span class="small text-muted" id="ordersShown"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="nova-card overflow-hidden">
+      <div class="table-responsive">
+        <table class="admin-table w-100">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Date</th>
+              <th>Items</th>
+              <th>Payment</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</main>
+
+<!-- Order Detail Modal -->
+<div class="modal fade" id="orderDetailModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content nova-modal">
+      <div class="modal-header border-0">
+        <h5 class="modal-title">Order Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="orderDetailBody"></div>
+      <div class="modal-footer border-0 flex-wrap gap-2">
+        <div class="me-auto d-flex align-items-center gap-2">
+          <label class="small fw-semibold mb-0">Update Status:</label>
+          <select class="form-select form-select-sm" id="statusUpdateSel" style="width:140px">
+            <option value="processing">Processing</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <button class="btn btn-sm btn-primary" onclick="applyStatusUpdate()">Update</button>
+        </div>
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-outline-primary" onclick="printOrderInvoice()"><i class="fas fa-print me-1"></i>Invoice</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index:9998"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/data.js"></script><script src="js/auth.js"></script><script src="js/cart.js"></script><script src="js/app.js"></script>
+<script>
+requireAdmin();
+let currentOrderId = null;
+
+function loadStats() {
+  const orders = getOrders();
+  document.getElementById('oStatTotal').textContent = orders.length;
+  document.getElementById('oStatProcessing').textContent = orders.filter(o=>o.status==='processing').length;
+  document.getElementById('oStatShipped').textContent = orders.filter(o=>o.status==='shipped').length;
+  document.getElementById('oStatDelivered').textContent = orders.filter(o=>o.status==='delivered').length;
+  document.getElementById('ordersCountLabel').textContent = `${orders.length} total orders · Revenue: ${formatPrice(orders.reduce((s,o)=>s+o.total,0))}`;
+}
+
+function renderOrders() {
+  const q = document.getElementById('orderSearch').value.toLowerCase();
+  const status = document.getElementById('statusFilter').value;
+  const pay = document.getElementById('payFilter').value;
+  let orders = getOrders();
+  if (q) orders = orders.filter(o => o.id.toLowerCase().includes(q) || (o.address||'').toLowerCase().includes(q));
+  if (status) orders = orders.filter(o=>o.status===status);
+  if (pay) orders = orders.filter(o=>o.payment===pay);
+  document.getElementById('ordersShown').textContent = `${orders.length} shown`;
+  const allUsers = getAllUsers();
+
+  document.getElementById('ordersTableBody').innerHTML = orders.map(o => {
+    const user = allUsers.find(u=>u.id===o.userId);
+    return `
+    <tr>
+      <td>
+        <button class="btn p-0" style="color:var(--primary-light);font-size:0.82rem;font-weight:600;background:none;border:none" onclick="viewOrder('${o.id}')">${o.id}</button>
+      </td>
+      <td>
+        ${user ? `<div class="d-flex align-items-center gap-2">
+          <img src="${user.avatar||`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`}" class="rounded-circle" width="28" height="28">
+          <span style="font-size:0.82rem">${user.name}</span>
+        </div>` : `<span class="text-muted small">${o.userId}</span>`}
+      </td>
+      <td style="font-size:0.82rem">${formatDate(o.date)}</td>
+      <td><span class="badge bg-secondary">${o.items.length} item${o.items.length!==1?'s':''}</span></td>
+      <td>
+        <span class="badge" style="background:var(--card2);border:1px solid var(--border2);color:var(--text2)">${o.payment.toUpperCase()}</span>
+      </td>
+      <td class="fw-bold" style="color:var(--primary-light);font-size:0.87rem">${formatPrice(o.total)}</td>
+      <td>${statusBadge(o.status)}</td>
+      <td>
+        <div class="d-flex gap-1">
+          <button class="btn btn-icon" style="width:30px;height:30px" title="View" onclick="viewOrder('${o.id}')"><i class="fas fa-eye" style="font-size:0.75rem"></i></button>
+          ${o.status!=='cancelled'&&o.status!=='delivered' ? `
+          <button class="btn btn-icon" style="width:30px;height:30px;background:rgba(34,197,94,0.1)" title="Mark Delivered" onclick="quickStatus('${o.id}','delivered')"><i class="fas fa-check" style="font-size:0.75rem;color:var(--success)"></i></button>
+          <button class="btn btn-icon" style="width:30px;height:30px;background:rgba(239,68,68,0.1)" title="Cancel" onclick="quickStatus('${o.id}','cancelled')"><i class="fas fa-ban" style="font-size:0.75rem;color:var(--danger)"></i></button>` : ''}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function viewOrder(id) {
+  const o = getOrders().find(x=>x.id===id);
+  if (!o) return;
+  currentOrderId = id;
+  document.getElementById('statusUpdateSel').value = o.status;
+  const allUsers = getAllUsers();
+  const user = allUsers.find(u=>u.id===o.userId);
+  document.getElementById('orderDetailBody').innerHTML = `
+    <div class="row g-3 mb-4">
+      <div class="col-sm-6">
+        <div class="small text-muted mb-1">Order ID</div>
+        <div class="fw-bold" style="color:var(--primary-light)">${o.id}</div>
+      </div>
+      <div class="col-sm-6">
+        <div class="small text-muted mb-1">Date</div>
+        <div class="fw-semibold">${formatDate(o.date)}</div>
+      </div>
+      <div class="col-sm-6">
+        <div class="small text-muted mb-1">Status</div>
+        ${statusBadge(o.status)}
+      </div>
+      <div class="col-sm-6">
+        <div class="small text-muted mb-1">Payment</div>
+        <div class="fw-semibold">${o.payment.toUpperCase()}</div>
+      </div>
+      <div class="col-12">
+        <div class="small text-muted mb-1">Ship To</div>
+        <div class="fw-semibold">${o.address}</div>
+      </div>
+      ${user ? `<div class="col-12">
+        <div class="small text-muted mb-1">Customer</div>
+        <div class="d-flex align-items-center gap-2">
+          <img src="${user.avatar}" class="rounded-circle" width="28" height="28">
+          <span class="fw-semibold">${user.name}</span>
+          <span class="text-muted small">${user.email}</span>
+        </div>
+      </div>` : ''}
+    </div>
+    <h6 class="fw-bold mb-3">Order Items</h6>
+    <table class="table mb-4" style="font-size:0.85rem">
+      <thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
+      <tbody>
+        ${o.items.map(item => {
+          const p = PRODUCTS.find(x=>x.id===item.productId);
+          return `<tr>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                ${p?`<img src="${p.image}" style="width:36px;height:36px;border-radius:6px;object-fit:cover" onerror="this.src='https://placehold.co/36x36/1a1a2e/7c3aed?text=N'">`:'' }
+                <span>${item.name}</span>
+              </div>
+            </td>
+            <td>${item.qty}</td>
+            <td>${formatPrice(item.price)}</td>
+            <td class="fw-semibold">${formatPrice(item.price*item.qty)}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+    <div class="text-end nova-card p-3" style="max-width:260px;margin-left:auto">
+      <div class="cart-total-row"><span>Subtotal</span><span>${formatPrice(o.subtotal)}</span></div>
+      <div class="cart-total-row"><span>Shipping</span><span>${o.shipping===0?'<span class="free">FREE</span>':formatPrice(o.shipping)}</span></div>
+      <div class="cart-total-row"><span>Tax</span><span>${formatPrice(o.tax)}</span></div>
+      <div class="cart-total-row total"><span>Total</span><span style="color:var(--primary-light)">${formatPrice(o.total)}</span></div>
+    </div>`;
+  new bootstrap.Modal(document.getElementById('orderDetailModal')).show();
+}
+
+function applyStatusUpdate() {
+  if (!currentOrderId) return;
+  const status = document.getElementById('statusUpdateSel').value;
+  updateOrderStatus(currentOrderId, status);
+  showToast(`Order status updated to <b>${status}</b>`, 'success');
+  loadStats(); renderOrders();
+  bootstrap.Modal.getInstance(document.getElementById('orderDetailModal')).hide();
+}
+
+function quickStatus(id, status) {
+  updateOrderStatus(id, status);
+  showToast(`Order ${id} marked as <b>${status}</b>`, 'success');
+  loadStats(); renderOrders();
+}
+
+function printOrderInvoice() {
+  if (!currentOrderId) return;
+  const o = getOrders().find(x=>x.id===currentOrderId);
+  if (!o) return;
+  const w = window.open('','_blank');
+  w.document.write(`<html><head><title>Invoice ${o.id}</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:640px;margin:0 auto}h1{color:#7c3aed}table{width:100%;border-collapse:collapse}td,th{padding:10px;border:1px solid #eee;text-align:left}.total{font-weight:bold}</style></head><body>
+    <h1>⚡ NOVA Store — Invoice</h1>
+    <p><b>Order ID:</b> ${o.id}<br><b>Date:</b> ${formatDate(o.date)}<br><b>Status:</b> ${o.status}<br><b>Payment:</b> ${o.payment.toUpperCase()}</p>
+    <p><b>Ship to:</b> ${o.address}</p>
+    <table><thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead><tbody>
+    ${o.items.map(i=>`<tr><td>${i.name}</td><td>${i.qty}</td><td>${formatPrice(i.price)}</td><td>${formatPrice(i.price*i.qty)}</td></tr>`).join('')}
+    </tbody><tfoot>
+    <tr><td colspan="3">Subtotal</td><td>${formatPrice(o.subtotal)}</td></tr>
+    <tr><td colspan="3">Shipping</td><td>${o.shipping===0?'FREE':formatPrice(o.shipping)}</td></tr>
+    <tr><td colspan="3">Tax</td><td>${formatPrice(o.tax)}</td></tr>
+    <tr class="total"><td colspan="3"><b>TOTAL</b></td><td><b>${formatPrice(o.total)}</b></td></tr>
+    </tfoot></table>
+    <p style="margin-top:48px;color:#aaa;font-size:0.8em">Generated by NOVA Store Admin · ${new Date().toLocaleString()}</p>
+    </body></html>`);
+  w.document.close(); w.print();
+}
+
+document.addEventListener('DOMContentLoaded', () => { loadStats(); renderOrders(); });
+</script>
+</body>
+</html>
