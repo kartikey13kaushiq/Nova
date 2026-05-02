@@ -11,10 +11,9 @@
   <style>
     .view-toggle .btn { padding: 6px 12px; }
     .view-toggle .btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-    #productList .product-card { flex-direction: row; }
-    #productList .product-img-wrap { width: 180px; flex-shrink: 0; }
-    #productList .product-img-wrap img { height: 180px; width: 180px; }
-    #productList .products-grid { grid-template-columns: 1fr; }
+    #productList.list-view .product-card { flex-direction: row; }
+    #productList.list-view .product-img-wrap { width: 180px; flex-shrink: 0; }
+    #productList.list-view .product-img-wrap img { height: 180px; width: 180px; }
     .sort-select { background: var(--card2); border: 1.5px solid var(--border2); color: var(--text); border-radius: var(--radius-pill); padding: 6px 14px; font-size: 0.85rem; outline: none; cursor: pointer; }
   </style>
 </head>
@@ -110,7 +109,14 @@
 
         <!-- Skeletons -->
         <div id="skeletonGrid" class="products-grid">
-          ${Array(8).fill('<div class="col"><div class="product-card"><div class="skeleton skeleton-img"></div><div class="p-3"><div class="skeleton skeleton-text w-40"></div><div class="skeleton skeleton-text w-80"></div><div class="skeleton skeleton-text w-60"></div></div></div></div>').join('')}
+          <div class="col"><div class="product-card"><div class="skeleton skeleton-img"></div><div class="p-3"><div class="skeleton skeleton-text w-40"></div><div class="skeleton skeleton-text w-80"></div><div class="skeleton skeleton-text w-60"></div></div></div></div>
+          <div class="col"><div class="product-card"><div class="skeleton skeleton-img"></div><div class="p-3"><div class="skeleton skeleton-text w-40"></div><div class="skeleton skeleton-text w-80"></div><div class="skeleton skeleton-text w-60"></div></div></div></div>
+          <div class="col"><div class="product-card"><div class="skeleton skeleton-img"></div><div class="p-3"><div class="skeleton skeleton-text w-40"></div><div class="skeleton skeleton-text w-80"></div><div class="skeleton skeleton-text w-60"></div></div></div></div>
+          <div class="col"><div class="product-card"><div class="skeleton skeleton-img"></div><div class="p-3"><div class="skeleton skeleton-text w-40"></div><div class="skeleton skeleton-text w-80"></div><div class="skeleton skeleton-text w-60"></div></div></div></div>
+          <div class="col"><div class="product-card"><div class="skeleton skeleton-img"></div><div class="p-3"><div class="skeleton skeleton-text w-40"></div><div class="skeleton skeleton-text w-80"></div><div class="skeleton skeleton-text w-60"></div></div></div></div>
+          <div class="col"><div class="product-card"><div class="skeleton skeleton-img"></div><div class="p-3"><div class="skeleton skeleton-text w-40"></div><div class="skeleton skeleton-text w-80"></div><div class="skeleton skeleton-text w-60"></div></div></div></div>
+          <div class="col"><div class="product-card"><div class="skeleton skeleton-img"></div><div class="p-3"><div class="skeleton skeleton-text w-40"></div><div class="skeleton skeleton-text w-80"></div><div class="skeleton skeleton-text w-60"></div></div></div></div>
+          <div class="col"><div class="product-card"><div class="skeleton skeleton-img"></div><div class="p-3"><div class="skeleton skeleton-text w-40"></div><div class="skeleton skeleton-text w-80"></div><div class="skeleton skeleton-text w-60"></div></div></div></div>
         </div>
 
         <!-- Products -->
@@ -285,6 +291,7 @@ function setView(v) {
   currentView = v;
   document.getElementById('gridViewBtn').classList.toggle('active', v==='grid');
   document.getElementById('listViewBtn').classList.toggle('active', v==='list');
+  document.getElementById('productList').classList.toggle('list-view', v==='list');
   applyFilters();
 }
 function clearFilters() {

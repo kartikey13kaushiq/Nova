@@ -74,7 +74,7 @@
 
 /* ── Reset & Base ─────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; font-size: 16px; }
+html { scroll-behavior: smooth; font-size: 16px; overflow-x: hidden; }
 body {
   font-family: var(--font);
   background: var(--bg);
@@ -148,7 +148,7 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-display); font-weight: 700; color: v
 /* ── Navbar ───────────────────────────────────────────────── */
 #mainNav {
   background: rgba(10,10,18,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border); height: var(--nav-h); z-index: 1050;
+  border-bottom: 1px solid var(--border); min-height: var(--nav-h); z-index: 1050;
   transition: var(--trans);
 }
 [data-theme="light"] #mainNav { background: rgba(248,250,252,0.9); }
@@ -582,6 +582,25 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px;
   .admin-sidebar.show { left: 0; }
   .admin-layout { flex-direction: column; }
   .admin-main { padding: 16px; }
+
+  /* Mobile hamburger menu — solid backdrop so it doesn't bleed over content */
+  #mainNav { height: auto; }
+  #navMenu {
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    padding: 8px 4px 16px;
+    margin-top: 4px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+  }
+  [data-theme="light"] #navMenu {
+    background: #fff;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+  }
+  #navMenu .navbar-nav { gap: 2px !important; }
+  #navMenu .nav-link { padding: 10px 16px !important; border-radius: var(--radius-md); }
+  #navMenu .nav-link:hover { background: var(--card2); }
+  #navMenu .mobileSearch { margin-top: 8px; }
 }
 @media (max-width: 767.98px) {
   :root { --nav-h: 64px; }
@@ -599,6 +618,15 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px;
   .stat-item .stat-num { font-size: 1.2rem; }
   .nova-toast { min-width: auto; max-width: 90vw; }
   #chatbot-widget { bottom: 16px; right: 16px; }
+  .promo-banner { padding: 24px 16px; overflow-x: hidden; }
+  .promo-banner .row { --bs-gutter-x: 1rem; }
+  .cart-item { flex-wrap: wrap; }
+  .cart-item-img { width: 64px !important; height: 64px !important; }
+  .quantity-control { transform: scale(0.9); }
+  .checkout-steps { gap: 4px; }
+  .checkout-steps .step-circle { width: 28px; height: 28px; font-size: 0.75rem; }
+  .hero-section .btn { padding: 10px 20px; font-size: 0.88rem; }
+  .admin-stats { grid-template-columns: repeat(2, 1fr) !important; }
 }
 
 /* ── Utilities ────────────────────────────────────────────── */
