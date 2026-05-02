@@ -254,7 +254,7 @@ function renderProduct(p) {
   // Cart btn
   document.getElementById('addCartBtn').onclick = () => {
     const qty = parseInt(document.getElementById('qtyInput').value);
-    for(let i=0;i<qty;i++) addToCart(p);
+    addToCart(p, qty);
   };
 
   // Wishlist
@@ -322,7 +322,7 @@ function handleProductWishlist() {
 function buyNow() {
   if (!currentProduct) return;
   const qty = parseInt(document.getElementById('qtyInput').value);
-  for(let i=0;i<qty;i++) addToCart(currentProduct,1);
+  addToCart(currentProduct, qty);
   window.location.href = 'checkout.html';
 }
 function shareProduct() {
