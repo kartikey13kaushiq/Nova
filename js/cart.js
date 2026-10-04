@@ -6,6 +6,7 @@ const CART_KEY      = 'nova_cart';
 const WISHLIST_KEY  = 'nova_wishlist';
 const ORDERS_KEY    = 'nova_orders';
 const VIEWED_KEY    = 'nova_recently_viewed';
+const COUPON_KEY    = 'nova_coupon';
 
 // ── Cart ──────────────────────────────────────────────────────
 function getCart() {
@@ -22,10 +23,10 @@ function addToCart(product, quantity = 1) {
   if (idx > -1) {
     cart[idx].quantity = Math.min(cart[idx].quantity + quantity, product.stock || 99);
   } else {
-    cart.push({ id: product.id, name: product.name, price: product.price, image: product.image, brand: product.brand, category: product.category, stock: product.stock || 99, quantity });
+    cart.push({ id: product.id, name: product.name, price: product.price, image: product.image, brand: product.brand, category: product.category, stock: product.stock || 99, quantity: Math.min(quantity, product.stock || 99) });
   }
   saveCart(cart);
-  showToast(`<b>${product.name}</b> added to cart!`, 'success');
+  showToast(`<b>${escapeHtml(product.name)}</b> added to cart!`, 'success');
 }
 
 function removeFromCart(productId) {
@@ -44,6 +45,7 @@ function updateCartQuantity(productId, quantity) {
 
 function clearCart() {
   sessionStorage.removeItem(CART_KEY);
+  sessionStorage.removeItem(COUPON_KEY);
   updateCartBadge();
 }
 
@@ -64,15 +66,44 @@ function getTax(subtotal) {
 }
 
 function applyCoupon(code, subtotal) {
-  const coupon = COUPONS[code.toUpperCase()];
+  const coupon = COUPONS[String(code || '').trim().toUpperCase()];
   if (!coupon) return { valid: false, message: 'Invalid coupon code.' };
-  if (coupon.type === 'percent') {
-    return { valid: true, discount: parseFloat((subtotal * coupon.discount / 100).toFixed(2)), desc: coupon.desc };
-  } else {
-    if (subtotal < 200 && coupon.discount === 50) return { valid: false, message: 'Minimum order of $200 required.' };
-    return { valid: true, discount: coupon.discount, desc: coupon.desc };
+  if (coupon.minSubtotal && subtotal < coupon.minSubtotal) {
+    return { valid: false, message: `Minimum order of ${formatPrice(coupon.minSubtotal)} required.` };
   }
+  const raw = coupon.type === 'percent' ? subtotal * coupon.discount / 100 : coupon.discount;
+  // A discount can never exceed what is being paid for.
+  const discount = parseFloat(Math.min(raw, subtotal).toFixed(2));
+  return { valid: true, discount, desc: coupon.desc };
 }
+
+function getAppliedCoupon() { return sessionStorage.getItem(COUPON_KEY) || ''; }
+function setAppliedCoupon(code) {
+  if (code) sessionStorage.setItem(COUPON_KEY, String(code).trim().toUpperCase());
+  else sessionStorage.removeItem(COUPON_KEY);
+}
+
+/**
+ * Prices a list of cart lines. Pure: the single source of truth for the cart page,
+ * checkout and the stored order. The coupon is re-validated against the current subtotal,
+ * so removing items can invalidate a minimum-spend coupon.
+ */
+function calculateTotals(items, couponCode = '') {
+  const subtotal = parseFloat(items.reduce((s, i) => s + i.price * i.quantity, 0).toFixed(2));
+  const coupon = couponCode ? applyCoupon(couponCode, subtotal) : null;
+  const discount = coupon && coupon.valid ? coupon.discount : 0;
+  const taxable = subtotal - discount;
+  const shipping = items.length ? getShipping(taxable) : 0;
+  const tax = getTax(taxable);
+  return {
+    subtotal, discount, shipping, tax,
+    total: parseFloat(Math.max(0, taxable + shipping + tax).toFixed(2)),
+    coupon: discount ? String(couponCode).trim().toUpperCase() : null,
+    couponError: coupon && !coupon.valid ? coupon.message : null,
+  };
+}
+
+function getCartTotals() { return calculateTotals(getCart(), getAppliedCoupon()); }
 
 function updateCartBadge() {
   const count = getCartCount();
@@ -101,7 +132,7 @@ function toggleWishlist(product) {
     return false;
   } else {
     list.push({ id: product.id, name: product.name, price: product.price, image: product.image, brand: product.brand, category: product.category, oldPrice: product.oldPrice, rating: product.rating });
-    showToast(`<b>${product.name}</b> added to wishlist!`, 'success');
+    showToast(`<b>${escapeHtml(product.name)}</b> added to wishlist!`, 'success');
     saveWishlist(list);
     return true;
   }
@@ -133,14 +164,11 @@ function saveOrders(orders) {
   sessionStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
 }
 
-function placeOrder(addressData, paymentMethod, couponDiscount = 0) {
+function placeOrder(addressData, paymentMethod) {
   const user = getCurrentUser();
   const cart = getCart();
   if (!cart.length) return null;
-  const subtotal = getCartSubtotal();
-  const shipping = getShipping(subtotal - couponDiscount);
-  const tax = getTax(subtotal - couponDiscount);
-  const total = parseFloat((subtotal - couponDiscount + shipping + tax).toFixed(2));
+  const { subtotal, discount, coupon, shipping, tax, total } = getCartTotals();
   const orderId = 'NOV-' + Date.now();
   const order = {
     id: orderId,
@@ -148,7 +176,7 @@ function placeOrder(addressData, paymentMethod, couponDiscount = 0) {
     date: new Date().toISOString().split('T')[0],
     status: 'processing',
     items: cart.map(i => ({ productId: i.id, name: i.name, qty: i.quantity, price: i.price })),
-    subtotal, shipping, tax, total,
+    subtotal, discount, coupon, shipping, tax, total,
     address: `${addressData.street}, ${addressData.city}, ${addressData.state} ${addressData.zip}`,
     payment: paymentMethod,
   };
