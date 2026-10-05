@@ -3,6 +3,12 @@
 // ============================================================
 
 // ── Utility ───────────────────────────────────────────────────
+/** Escapes text for safe interpolation into HTML (element content and quoted attributes). */
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"'`]/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;',
+  })[ch]);
+}
 function formatPrice(n) { return CURRENCY + parseFloat(n).toFixed(2); }
 function formatDate(d) { return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }); }
 function generateId() { return Math.random().toString(36).substring(2, 9).toUpperCase(); }
@@ -183,7 +189,7 @@ function renderNavbar() {
             <img src="${user.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.id}" class="rounded-circle" width="28" height="28" style="object-fit:cover">
           </button>
           <ul class="dropdown-menu dropdown-menu-end nova-dropdown">
-            <li class="dropdown-header"><b>${user.name}</b><br><small class="text-muted">${user.email}</small></li>
+            <li class="dropdown-header"><b>${escapeHtml(user.name)}</b><br><small class="text-muted">${escapeHtml(user.email)}</small></li>
             <li><hr class="dropdown-divider"></li>
             ${user.role === 'admin' ? '<li><a class="dropdown-item" href="admin.html"><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</a></li>' : ''}
             <li><a class="dropdown-item" href="profile.html"><i class="fas fa-user me-2"></i>My Profile</a></li>
@@ -455,7 +461,8 @@ function appendChat(msg, role) {
   const m = document.getElementById('chat-messages');
   const d = document.createElement('div');
   d.className = `chat-msg ${role}`;
-  d.innerHTML = msg;
+  // Bot replies are trusted markup with links; whatever the visitor typed is shown as text.
+  if (role === 'user') d.textContent = msg; else d.innerHTML = msg;
   m.appendChild(d);
   m.scrollTop = m.scrollHeight;
 }

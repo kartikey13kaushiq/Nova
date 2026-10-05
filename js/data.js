@@ -420,7 +420,7 @@ const STATIC_USERS = [
 const COUPONS = {
   'NOVA10':  { discount: 10, type: 'percent', desc: '10% off your order' },
   'SAVE20':  { discount: 20, type: 'percent', desc: '20% off your order' },
-  'FLAT50':  { discount: 50, type: 'fixed',   desc: '$50 off orders over $200' },
+  'FLAT50':  { discount: 50, type: 'fixed',   desc: '$50 off orders over $200', minSubtotal: 200 },
   'WELCOME': { discount: 15, type: 'percent', desc: '15% off for new members' },
   'DEAL30':  { discount: 30, type: 'percent', desc: '30% off deal items' },
 };

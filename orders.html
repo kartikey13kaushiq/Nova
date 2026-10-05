@@ -4,7 +4,7 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Orders — NOVA Store</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <link href="css/style.css" rel="stylesheet">
 </head>
@@ -59,7 +59,7 @@
 <div id="footer-container"></div>
 <div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index:9998"></div>
 <button id="backToTop" class="btn btn-primary position-fixed" style="bottom:88px;right:24px;display:none;z-index:9990"><i class="fas fa-arrow-up"></i></button>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 <script src="js/data.js"></script><script src="js/auth.js"></script><script src="js/cart.js"></script><script src="js/app.js"></script>
 <script>
 requireLogin();
@@ -153,7 +153,7 @@ function viewOrder(id) {
       <div class="col-6"><div class="small text-muted">Date</div><div class="fw-semibold">${formatDate(o.date)}</div></div>
       <div class="col-6"><div class="small text-muted">Status</div>${statusBadge(o.status)}</div>
       <div class="col-6"><div class="small text-muted">Payment</div><div class="fw-semibold">${o.payment.toUpperCase()}</div></div>
-      <div class="col-12"><div class="small text-muted">Ship To</div><div class="fw-semibold">${o.address}</div></div>
+      <div class="col-12"><div class="small text-muted">Ship To</div><div class="fw-semibold">${escapeHtml(o.address)}</div></div>
     </div>
     <table class="table" style="font-size:0.87rem">
       <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
@@ -193,7 +193,7 @@ function printCurrentOrder() {
   w.document.write(`<html><head><title>Invoice ${o.id}</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:600px;margin:0 auto}h1{color:#7c3aed}table{width:100%;border-collapse:collapse}td,th{padding:10px;border:1px solid #eee;text-align:left}</style></head><body>
     <h1>⚡ NOVA Store — Invoice</h1>
     <p><b>Order:</b> ${o.id} | <b>Date:</b> ${formatDate(o.date)} | <b>Status:</b> ${o.status}</p>
-    <p><b>Ship to:</b> ${o.address}</p>
+    <p><b>Ship to:</b> ${escapeHtml(o.address)}</p>
     <table><thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead><tbody>
     ${o.items.map(i=>`<tr><td>${i.name}</td><td>${i.qty}</td><td>${formatPrice(i.price)}</td><td>${formatPrice(i.price*i.qty)}</td></tr>`).join('')}
     </tbody><tfoot>
